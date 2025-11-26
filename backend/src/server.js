@@ -2,6 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const adminRoutes = require("./routes/adminRoutes");
+const hospitalRoutes = require("./routes/hospitalRoutes");
 
 dotenv.config();
 connectDB();
@@ -14,6 +16,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/admin", adminRoutes);
+app.use("/api/hospitals", hospitalRoutes);
 
 // Test route
 app.get("/", (req, res) => {
