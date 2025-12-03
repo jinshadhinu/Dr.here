@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "hospital", "doctor", "patient"],
     default: "patient",
   },
+  hospitalId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Hospital",
+    required: false
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

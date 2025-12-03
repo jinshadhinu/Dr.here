@@ -11,7 +11,9 @@ router.get("/test", (req, res) => res.json({ ok: true, where: "hospitals" }));
 router.post("/add", protect, authorizeRoles("admin"), async (req, res) => {
   try {
     const { name, address, phone, email } = req.body;
-
+if (!name || !address || !phone) {
+      return res.status(400).json({ message: "name, address and phone are required" });
+    }
     const hospital = await Hospital.create({
       name,
       address,
@@ -38,5 +40,64 @@ router.get("/", protect, authorizeRoles("admin"), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+// Get single hospital by id (admin only) — useful for edit page
+router.get("/:id", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const hospital = await Hospital.findById(req.params.id);
+    if (!hospital) return res.status(404).json({ message: "Hospital not found" });
+    res.json({ success: true, data: hospital });
+  } catch (err) {
+    console.error("Get hospital error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🔁 Update hospital (admin only)
+router.put("/:id", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const hospId = req.params.id;
+    const { name, address, phone, email } = req.body;
+
+    const hospital = await Hospital.findById(hospId);
+    if (!hospital) {
+      return res.status(404).json({ message: "Hospital not found" });
+    }
+
+    // Update fields if provided
+    hospital.name = name ?? hospital.name;
+    hospital.address = address ?? hospital.address;
+    hospital.phone = phone ?? hospital.phone;
+    hospital.email = email ?? hospital.email;
+
+    const updated = await hospital.save();
+
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    console.error("Update hospital error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 🗑 Delete hospital (admin only)
+router.delete("/:id", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    const hospId = req.params.id;
+    const hospital = await Hospital.findByIdAndDelete(hospId);
+
+    if (!hospital) {
+      return res.status(404).json({ message: "Hospital not found" });
+    }
+    // remove related docs
+await Doctor.deleteMany({ hospital: hospId });
+await Appointment.deleteMany({ hospital: hospId });
+
+
+    res.json({ success: true, message: "Hospital deleted" });
+  } catch (err) {
+    console.error("Delete hospital error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 module.exports = router;
