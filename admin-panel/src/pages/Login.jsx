@@ -1,41 +1,50 @@
 // src/pages/Login.jsx
-import { useState } from "react";
-import api from "../api/axios";
+import React, { useState } from "react";
+import axios from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
-export default function Login() {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const login = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     try {
-      const res = await api.post("/admin/login", { email, password });
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
 
+      console.log("LOGIN SUCCESS:", res.data);
       localStorage.setItem("token", res.data.token);
-      window.location.href = "/dashboard";
+      navigate("/dashboard");
     } catch (err) {
+      console.error("LOGIN ERROR:", err.response?.data || err.message);
       alert("Invalid credentials");
     }
   };
 
   return (
-    <div className="login-page">
-      <h2>Admin Login</h2>
-
+    <form onSubmit={handleLogin}>
       <input
-        type="text"
-        placeholder="Enter email"
+        type="email"
         value={email}
-        onChange={e => setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
       />
 
       <input
         type="password"
-        placeholder="Enter password"
         value={password}
-        onChange={e => setPassword(e.target.value)}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
       />
 
-      <button onClick={login}>Login</button>
-    </div>
+      <button type="submit">Login</button>
+    </form>
   );
-}
+};
+
+export default Login;
