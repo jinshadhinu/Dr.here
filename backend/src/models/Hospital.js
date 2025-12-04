@@ -16,6 +16,7 @@ const hospitalSchema = new mongoose.Schema({
   email: {
     type: String,
   },
+  status: { type: String, default: "pending" },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
