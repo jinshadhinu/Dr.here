@@ -1,14 +1,12 @@
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-
-export default function Settings() {
+const Settings = () => {
   return (
-    <div className="layout">
-      <Sidebar />
-      <div className="content">
-        <Navbar />
-        <h1>Settings</h1>
-      </div>
+    <div>
+      <h2>Settings</h2>
+
+      <p>Admin Account Settings</p>
+
     </div>
   );
-}
+};
+
+export default Settings;

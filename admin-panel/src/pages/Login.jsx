@@ -1,49 +1,102 @@
-// src/pages/Login.jsx
-import React, { useState } from "react";
-import axios from "../api/axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-
-      console.log("LOGIN SUCCESS:", res.data);
+      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      console.error("LOGIN ERROR:", err.response?.data || err.message);
-      alert("Invalid credentials");
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
+    <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: "100vh",
+      background: "#f1f3f6",
+    }}>
+      <div style={{
+        width: "400px",
+        padding: "40px",
+        borderRadius: "10px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+        backgroundColor: "#fff",
+      }}>
+        <h2 style={{ textAlign: "center", marginBottom: "30px" }}>Admin Login</h2>
 
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
+        {error && <div style={{
+          marginBottom: "20px",
+          color: "#dc3545",
+          textAlign: "center",
+        }}>{error}</div>}
 
-      <button type="submit">Login</button>
-    </form>
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: "20px" }}>
+            <label>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "5px",
+                borderRadius: "5px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+
+          <div style={{ marginBottom: "30px" }}>
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "5px",
+                borderRadius: "5px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "5px",
+              border: "none",
+              backgroundColor: "#007bff",
+              color: "#fff",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            Login
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 

@@ -1,80 +1,59 @@
-// src/pages/Hospitals.jsx
 import { useEffect, useState } from "react";
-import api from "../api/axios";
+import axios from "../api/axios";
 
-function Hospitals() {
+const Hospitals = () => {
   const [hospitals, setHospitals] = useState([]);
 
-  // ✅ 1. GET all hospitals from backend
-  const getHospitals = async () => {
-    try {
-      const res = await api.get("/admin/hospitals", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      setHospitals(res.data);
-    } catch (err) {
-      alert("Error loading hospitals");
-    }
+  const fetchHospitals = async () => {
+    const res = await axios.get("/api/admin/hospitals");
+    setHospitals(res.data);
   };
 
-  // ✅ Load hospitals when page opens
   useEffect(() => {
-    getHospitals();
+    fetchHospitals();
   }, []);
 
-  // ✅ 2. APPROVE hospital function
   const approveHospital = async (id) => {
-    try {
-      await api.put(
-        `/admin/hospital/approve/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+    await axios.put(`/api/admin/hospitals/approve/${id}`);
+    fetchHospitals();
+  };
 
-      alert("Hospital approved");
-      getHospitals(); // reload list
-    } catch (err) {
-      alert("Approval failed");
-    }
+  const rejectHospital = async (id) => {
+    await axios.put(`/api/admin/hospitals/reject/${id}`);
+    fetchHospitals();
   };
 
   return (
     <div>
       <h2>Hospitals</h2>
 
-      {hospitals.length === 0 ? (
-        <p>No hospitals found</p>
-      ) : (
-        hospitals.map((h) => (
-          <div
-            key={h._id}
-            style={{
-              border: "1px solid black",
-              margin: "10px",
-              padding: "10px",
-            }}
-          >
-            <p><b>Name:</b> {h.name}</p>
-            <p><b>Email:</b> {h.email}</p>
-            <p><b>Status:</b> {h.isApproved ? "Approved" : "Pending"}</p>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-            {!h.isApproved && (
-              <button onClick={() => approveHospital(h._id)}>
-                Approve
-              </button>
-            )}
-          </div>
-        ))
-      )}
+        <tbody>
+          {hospitals.map(h => (
+            <tr key={h._id}>
+              <td>{h.name}</td>
+              <td>{h.email}</td>
+              <td>{h.status}</td>
+              <td>
+                <button onClick={() => approveHospital(h._id)}>Approve</button>
+                <button onClick={() => rejectHospital(h._id)}>Reject</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
     </div>
   );
-}
+};
 
 export default Hospitals;
