@@ -5,8 +5,19 @@ const Hospitals = () => {
   const [hospitals, setHospitals] = useState([]);
 
   const fetchHospitals = async () => {
-    const res = await axios.get("/api/admin/hospitals");
-    setHospitals(res.data);
+    try {
+      const res = await axios.get("/api/admin/hospitals");
+
+      if (Array.isArray(res.data.data)) {
+        setHospitals(res.data.data);
+      } else {
+        setHospitals([]);
+      }
+
+    } catch (error) {
+      console.log("GET HOSPITALS ERROR:", error);
+      setHospitals([]);
+    }
   };
 
   useEffect(() => {
