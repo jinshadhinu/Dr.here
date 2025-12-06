@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 
 const Dashboard = () => {
+    if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/";
+}
   const [stats, setStats] = useState({
     users: 0,
     hospitals: 0,

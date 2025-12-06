@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 
 const Users = () => {
+  if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/";
+}
   const [users, setUsers] = useState([]);
 
   useEffect(() => {

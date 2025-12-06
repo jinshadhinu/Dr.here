@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 
 const Hospitals = () => {
+  if (localStorage.getItem("role") !== "admin") {
+  window.location.href = "/";
+}
   const [hospitals, setHospitals] = useState([]);
 
   const fetchHospitals = async () => {

@@ -1,103 +1,122 @@
 import { useState } from "react";
+import axios from "axios"; // simple axios import
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
 
-const Login = () => {
-  const navigate = useNavigate();
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  // Minimal login handler
+  const loginHandler = async (e) => {
     e.preventDefault();
+    setErrorMsg(""); // clear previous errors
+    console.log("Login button clicked!", { email, password });
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { email, password }
+      );
+
+      console.log("Backend response:", res.data);
+
+      if (res.data.token && res.data.role) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("role", res.data.role);
+        if (res.data.role === "admin") navigate("/admin/dashboard");
+        else if (res.data.role === "hospital") navigate("/hospital/dashboard");
+      } else {
+        setErrorMsg(res.data.message || "Login failed");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      console.error("Login error:", err.response || err);
+      setErrorMsg(err.response?.data?.message || "Server error / Invalid credentials");
     }
   };
 
-  return (
-    <div style={{
+  // Inline styles
+  const styles = {
+    container: {
+      height: "100vh",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      minHeight: "100vh",
-      background: "#f1f3f6",
-    }}>
-      <div style={{
-        width: "400px",
-        padding: "40px",
-        borderRadius: "10px",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }}>
-        <h2 style={{ textAlign: "center", marginBottom: "30px" }}>Admin Login</h2>
+      background: "#e0eafc",
+    },
+    box: {
+      padding: "30px",
+      borderRadius: "10px",
+      background: "#fff",
+      width: "320px",
+      textAlign: "center",
+      boxShadow: "0 5px 20px rgba(0,0,0,0.1)",
+    },
+    title: {
+      fontSize: "28px",
+      fontWeight: "bold",
+      color: "#1f3c88",
+      marginBottom: "5px",
+    },
+    subtitle: {
+      color: "gray",
+      marginBottom: "20px",
+    },
+    input: {
+      width: "100%",
+      padding: "10px",
+      marginBottom: "10px",
+      borderRadius: "5px",
+      border: "1px solid lightgray",
+      outline: "none",
+    },
+    button: {
+      width: "100%",
+      padding: "10px",
+      background: "#1f3c88",
+      color: "#fff",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    },
+    errorMsg: {
+      color: "red",
+      marginBottom: "10px",
+      fontSize: "14px",
+    },
+  };
 
-        {error && <div style={{
-          marginBottom: "20px",
-          color: "#dc3545",
-          textAlign: "center",
-        }}>{error}</div>}
+  return (
+    <div style={styles.container}>
+      <form style={styles.box} onSubmit={loginHandler}>
+        <h1 style={styles.title}>Dr.Here</h1>
+        <p style={styles.subtitle}>Login</p>
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: "20px" }}>
-            <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email"
-              style={{
-                width: "100%",
-                padding: "10px",
-                marginTop: "5px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-              }}
-            />
-          </div>
+        {errorMsg && <p style={styles.errorMsg}>{errorMsg}</p>}
 
-          <div style={{ marginBottom: "30px" }}>
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
-              style={{
-                width: "100%",
-                padding: "10px",
-                marginTop: "5px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-              }}
-            />
-          </div>
+        <input
+          type="email"
+          placeholder="Email"
+          required
+          style={styles.input}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          style={styles.input}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "5px",
-              border: "none",
-              backgroundColor: "#007bff",
-              color: "#fff",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
-          >
-            Login
-          </button>
-        </form>
-      </div>
+        <button type="submit" style={styles.button}>
+          Login
+        </button>
+      </form>
     </div>
   );
-};
-
-export default Login;
+}
