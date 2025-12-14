@@ -1,0 +1,101 @@
+/* Background */
+.glass-login-background {
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Dark overlay for better contrast */
+.glass-login-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+
+}
+
+/* GLASS CARD */
+.glass-card {
+  position: relative;
+  width: 380px;
+  padding: 35px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(70px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 25px #006a3a(0, 0, 0, 0.25);
+  text-align: center;
+  color: white;
+}
+
+/* TITLE */
+.glass-title {
+  font-size: 51px;
+  color: #006a3a;
+  font-family:'Modern';
+  font-weight: 1000;
+  margin-bottom: 5px;
+}
+
+.glass-sub {
+  font-size: 15px;
+  opacity: 0.8;
+  margin-bottom: 25px;
+}
+
+/* INPUTS */
+.glass-input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(5px);
+  color: white;
+  outline: none;
+  font-size: 15px;
+  transition: 0.2s ease-in-out;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.glass-input:focus {
+  border-color: #006a3a;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* BUTTON */
+.glass-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #006a3a;
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.glass-button:hover {
+  background: #008f4a;
+  transform: translateY(-2px);
+}
+
+/* FOOTER */
+.glass-footer {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 15px;
+}

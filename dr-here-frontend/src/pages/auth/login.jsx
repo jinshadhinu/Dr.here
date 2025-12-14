@@ -1,55 +1,65 @@
-import "./login.css";
-import bg from "../assets/bg.jpg";
-import axios from "axios";
 import { useState } from "react";
+import "./login.css";
+import bg from "../../assets/bg.jpg";
+import axios from "axios";
+
+const handleLogin = () => {
+  const hospitalData = {
+    id: "hosp_001",
+    name: "City Hospital",
+    doctorsCount: 12,
+    patientsCount: 320,
+    appointmentsToday: 45
+  };
+
+localStorage.setItem("token", res.data.token);
+localStorage.setItem("hospital", JSON.stringify(res.data.hospital));
+
+  navigate("/hospital/dashboard");
+};
+
 
 function Login() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     console.log("LOGIN BUTTON CLICKED");
 
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
-        password
+        password,
       });
 
       console.log("LOGIN SUCCESS:", res.data);
 
-      // Redirect based on role
       if (res.data.role === "admin") {
         window.location.href = "/admin/dashboard";
-      } else if (res.data.role === "hospital") {
+      } else {
         window.location.href = "/hospital/dashboard";
       }
-
-    } catch (error) {
-      console.log("LOGIN FAILED:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Login failed");
+    } catch (err) {
+      alert(err.response?.data?.message || "Invalid credentials");
+      console.log(err);
     }
   };
 
   return (
     <div
-      className="login-container"
-      style={{
-        backgroundImage: `url(${bg})`,
-      }}
+      className="glass-login-background"
+      style={{ backgroundImage: `url(${bg})` }}
     >
-      <div className="login-card">
-        <h2 className="title">Welcome Back</h2>
-        <p className="sub">Login to your account</p>
+      <div className="glass-card">
+        <h3 className="glass-title">Dr.Here</h3>
+        <p className="glass-sub">Admin Login</p>
 
         <form onSubmit={handleSubmit}>
           <input
             type="email"
             placeholder="Email"
-            className="input-box"
+            className="glass-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -57,20 +67,21 @@ function Login() {
           <input
             type="password"
             placeholder="Password"
-            className="input-box"
+            className="glass-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <button className="login-btn" type="submit">
+          <button type="submit" className="glass-button">
             Login
           </button>
         </form>
 
-        <p className="footer-text">© 2025 Dr.Here — Hospital Management System</p>
+        <p className="glass-footer">© 2025 Dr.Here Admin Portal</p>
       </div>
     </div>
   );
 }
 
 export default Login;
+

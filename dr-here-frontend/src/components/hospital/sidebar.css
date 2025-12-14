@@ -1,0 +1,90 @@
+/* Base: overlay sidebar that does NOT push content */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  background: #006a3a;
+  color: white;
+  overflow: hidden;
+  width: 70px;                       /* collapsed width */
+  transition: width 240ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
+  z-index: 1000;
+  padding-top: 10px;
+  box-shadow: none;
+  will-change: width;
+}
+
+/* Expanded */
+.sidebar.open {
+  width: 230px;                      /* expanded width */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Title */
+.sidebar-title {
+  font-size: 25px;
+  font-weight: 700;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+/* Menu */
+.sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 10px 4px;
+}
+
+.sidebar-menu li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 8px;
+  transition: background 160ms;
+}
+
+/* Hover highlight */
+.sidebar-menu li:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* Icon size & layout */
+.sidebar-menu li svg {
+  font-size: 20px !important;   /* increase icon size */
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0;               /* prevents distortion */
+}
+
+/* Text label (fade + slide) */
+.label {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/* When collapsed, ensure label is not visible and doesn't cause layout changes */
+.sidebar.closed .label {
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+}
+
+/* When collapsed, center icons */
+.sidebar.closed .sidebar-menu li {
+  justify-content: center;
+}
+
+/* Accessibility: focus state */
+.sidebar-menu li:focus,
+.sidebar-menu li:active {
+  outline: none;
+  background: rgba(255,255,255,0.12);
+}
+
+/* Keep dashboard content fixed (no shifting) — ensure you have matching rules in Dashboard CSS */
