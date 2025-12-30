@@ -6,6 +6,8 @@ const adminRoutes = require("./routes/adminRoutes");
 const hospitalRoutes = require("./routes/hospitalRoutes");
 const doctorRoutes = require("./routes/doctorRoutes");
 const adminHospitalRoutes = require("./routes/adminHospitalRoutes");
+const hospitalProfileRoutes = require("./routes/hospitalProfileRoutes");
+const departmentRoutes = require("./routes/departmentRoutes");
 
 dotenv.config();
 connectDB();
@@ -22,6 +24,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/hospitals", hospitalRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/admin", adminHospitalRoutes);
+app.use("/api/hospital", hospitalProfileRoutes);
+app.use("/api/hospital/departments", departmentRoutes);
 
 // Test route
 app.get("/", (req, res) => {

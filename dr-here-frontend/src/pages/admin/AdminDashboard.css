@@ -1,0 +1,184 @@
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.dashboard-content {
+  flex: 1;                     /* FILL REMAINING SPACE */
+  background: #f5f5f5;
+  padding: 20px;
+  margin-top: 60px;            /* navbar height */
+  margin-left: 70px;           /* collapsed sidebar width */
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 25px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.hospital-table-wrapper {
+  margin-top: 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+}
+
+.hospital-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.hospital-table th,
+.hospital-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.hospital-table th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.status {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-pill.approved {
+  background: #ecfdf3;
+  color: #0f766e;
+}
+
+.status-pill.pending {
+  background: #fefce8;
+  color: #92400e;
+}
+
+.status-pill.rejected {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.btn-approve,
+.btn-reject {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.btn-approve {
+  background: #0f766e;
+  color: white;
+}
+
+.btn-reject {
+  background: #b91c1c;
+  color: white;
+}
+
+.btn-edit {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  margin-right: 6px;
+  background: #2563eb;
+  color: white;
+}
+
+.btn-delete {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  background: #dc2626;
+  color: white;
+}
+
+.btn-approve:disabled,
+.btn-reject:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hospital-form-card {
+  margin-top: 30px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  padding: 20px;
+  max-width: 600px;
+}
+
+.hospital-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hospital-form .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hospital-form label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hospital-form input,
+.hospital-form textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  outline: none;
+}
+
+.hospital-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.filter-input,
+.filter-select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.filter-input {
+  flex: 1;
+}

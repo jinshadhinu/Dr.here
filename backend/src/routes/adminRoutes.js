@@ -1,5 +1,6 @@
 const express = require("express");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const Hospital = require("../models/Hospital");
 
 const router = express.Router();
 
@@ -10,6 +11,44 @@ router.get("/test", protect, authorizeRoles("admin"), (req, res) => {
     message: "Admin Route Working! 🎉",
     user: req.user,
   });
+});
+
+// 📊 Get admin statistics (ADMIN only)
+router.get("/statistics", protect, authorizeRoles("admin"), async (req, res) => {
+  try {
+    // Get total hospitals
+    const totalHospitals = await Hospital.countDocuments();
+
+    // Get active (approved) hospitals
+    const activeHospitals = await Hospital.countDocuments({ status: "approved" });
+
+    // Get pending hospitals
+    const pendingHospitals = await Hospital.countDocuments({ status: "pending" });
+
+    // Get rejected hospitals (for completeness)
+    const rejectedHospitals = await Hospital.countDocuments({ status: "rejected" });
+
+    // Debug: Log the counts
+    console.log("Admin Statistics:", {
+      totalHospitals,
+      activeHospitals,
+      pendingHospitals,
+      rejectedHospitals,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        totalHospitals,
+        activeHospitals,
+        pendingHospitals,
+        rejectedHospitals,
+      },
+    });
+  } catch (error) {
+    console.error("Get admin statistics error:", error);
+    res.status(500).json({ message: error.message });
+  }
 });
 
 module.exports = router;

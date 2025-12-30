@@ -7,9 +7,10 @@
   padding: 0 25px;
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 70px; /* Account for sidebar width */
+  width: calc(100% - 70px); /* Subtract sidebar width */
   z-index: 1000;
+  box-sizing: border-box;
 }
 
 .nav-title {
@@ -37,4 +38,16 @@
   object-fit: cover;
   border: 2px solid white; /* white border for profile picture */
 }
+.logout-btn {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
+.logout-btn:hover {
+  background: white;
+  color: #006a3a;
+}

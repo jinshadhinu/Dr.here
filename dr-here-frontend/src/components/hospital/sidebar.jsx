@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./sidebar.css";
 import {
   FaHome,
@@ -7,11 +8,13 @@ import {
   FaUsers,
   FaStar,
   FaCog,
-  FaBuilding
+  FaBuilding,
+  FaKey
 } from "react-icons/fa";
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -28,6 +31,10 @@ function Sidebar() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
     <div className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="sidebar-title">
@@ -35,15 +42,46 @@ function Sidebar() {
       </div>
 
       <ul className="sidebar-menu">
-        <li><FaHome /> {isOpen && "Dashboard"}</li>
-        <li><FaCalendarCheck /> {isOpen && "Appointments"}</li>
-        <li><FaBuilding /> {isOpen && "Departments"}</li>
-        <li><FaUserMd /> {isOpen && "Doctors"}</li>
-      
-        <li><FaUsers /> {isOpen && "Patients"}</li>
-    
-        <li><FaStar /> {isOpen && "Reviews"}</li>
-        <li><FaCog /> {isOpen && "Settings"}</li>
+        <li className={isActive("/hospital/dashboard") ? "active" : ""}>
+          <Link to="/hospital/dashboard">
+            <FaHome /> {isOpen && "Dashboard"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/appointments") ? "active" : ""}>
+          <Link to="/hospital/appointments">
+            <FaCalendarCheck /> {isOpen && "Appointments"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/departments") ? "active" : ""}>
+          <Link to="/hospital/departments">
+            <FaBuilding /> {isOpen && "Departments"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/doctors") ? "active" : ""}>
+          <Link to="/hospital/doctors">
+            <FaUserMd /> {isOpen && "Doctors"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/patients") ? "active" : ""}>
+          <Link to="/hospital/patients">
+            <FaUsers /> {isOpen && "Patients"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/reviews") ? "active" : ""}>
+          <Link to="/hospital/reviews">
+            <FaStar /> {isOpen && "Reviews"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/change-password") ? "active" : ""}>
+          <Link to="/hospital/change-password">
+            <FaKey /> {isOpen && "Change Password"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/settings") ? "active" : ""}>
+          <Link to="/hospital/settings">
+            <FaCog /> {isOpen && "Settings"}
+          </Link>
+        </li>
       </ul>
     </div>
   );

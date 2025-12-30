@@ -1,4 +1,4 @@
-/* Base: overlay sidebar that does NOT push content */
+/* Same design as hospital sidebar */
 .sidebar {
   position: fixed;
   top: 0;
@@ -10,7 +10,7 @@
   width: 70px;                       /* collapsed width */
   transition: width 240ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
   z-index: 1000;
-  padding-top: 10px;
+  padding-top: 0;
   box-shadow: none;
   will-change: width;
 }
@@ -21,14 +21,7 @@
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
-/* Title */
-.sidebar-title {
-  font-size: 25px;
-  font-weight: 700;
-  padding: 12px 20px;
-  margin-bottom: 10px;
-  white-space: nowrap;
-}
+/* Title removed */
 
 /* Menu */
 .sidebar-menu {
@@ -37,38 +30,25 @@
   padding: 10px 4px;
 }
 
+.sidebar-menu {
+  padding-top: 16px;
+}
+
 .sidebar-menu li {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0;
+  padding: 14px 20px;
   cursor: pointer;
   white-space: nowrap;
   border-radius: 8px;
   transition: background 160ms;
-}
-
-.sidebar-menu li a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 22px 20px;
-  width: 100%;
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background 160ms;
+  margin: 4px 8px;
 }
 
 /* Hover highlight */
-.sidebar-menu li:hover a {
+.sidebar-menu li:hover {
   background: rgba(255,255,255,0.08);
-}
-
-/* Active state */
-.sidebar-menu li.active a {
-  background: rgba(255,255,255,0.15);
-  font-weight: 600;
 }
 
 /* Icon size & layout */
@@ -104,5 +84,3 @@
   outline: none;
   background: rgba(255,255,255,0.12);
 }
-
-/* Keep dashboard content fixed (no shifting) — ensure you have matching rules in Dashboard CSS */

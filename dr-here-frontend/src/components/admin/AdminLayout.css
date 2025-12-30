@@ -1,0 +1,34 @@
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* RIGHT SIDE */
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #f4f6f8;
+  margin-left: 70px; /* Account for fixed sidebar width */
+}
+
+/* TOP BAR */
+.admin-navbar {
+  height: 60px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* PAGE CONTENT */
+.admin-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  background: #f4f6f8;
+}

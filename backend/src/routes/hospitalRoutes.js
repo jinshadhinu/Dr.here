@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 const Hospital = require("../models/Hospital");
 
@@ -10,15 +11,21 @@ router.get("/test", (req, res) => res.json({ ok: true, where: "hospitals" }));
 // ➕ Add hospital (ADMIN only)
 router.post("/add", protect, authorizeRoles("admin"), async (req, res) => {
   try {
-    const { name, address, phone, email } = req.body;
-if (!name || !address || !phone) {
-      return res.status(400).json({ message: "name, address and phone are required" });
+    const { name, address, phone, email, password } = req.body;
+    if (!name || !address || !phone || !password) {
+      return res.status(400).json({ message: "name, address, phone and password are required" });
     }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const hospital = await Hospital.create({
       name,
       address,
       phone,
       email,
+      password: hashedPassword,
+      status: "pending",
       createdBy: req.user._id
     });
 
