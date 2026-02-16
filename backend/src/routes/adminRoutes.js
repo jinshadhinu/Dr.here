@@ -1,6 +1,8 @@
 const express = require("express");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 const Hospital = require("../models/Hospital");
+const Doctor = require("../models/Doctor");
+const User = require("../models/User");
 
 const router = express.Router();
 
@@ -28,12 +30,20 @@ router.get("/statistics", protect, authorizeRoles("admin"), async (req, res) => 
     // Get rejected hospitals (for completeness)
     const rejectedHospitals = await Hospital.countDocuments({ status: "rejected" });
 
+    // Get total doctors (all doctors in the system)
+    const totalDoctors = await Doctor.countDocuments();
+
+    // Get total patients (users with role "patient")
+    const totalPatients = await User.countDocuments({ role: "patient" });
+
     // Debug: Log the counts
     console.log("Admin Statistics:", {
       totalHospitals,
       activeHospitals,
       pendingHospitals,
       rejectedHospitals,
+      totalDoctors,
+      totalPatients,
     });
 
     res.json({
@@ -43,6 +53,8 @@ router.get("/statistics", protect, authorizeRoles("admin"), async (req, res) => 
         activeHospitals,
         pendingHospitals,
         rejectedHospitals,
+        totalDoctors,
+        totalPatients,
       },
     });
   } catch (error) {

@@ -70,20 +70,6 @@
   flex-shrink: 0;               /* prevents distortion */
 }
 
-/* Text label (fade + slide) */
-.label {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-
-/* When collapsed, ensure label is not visible and doesn't cause layout changes */
-.sidebar.closed .label {
-  opacity: 0;
-  transform: translateX(-6px);
-  pointer-events: none;
-}
-
 /* When collapsed, center icons */
 .sidebar:not(.open) .sidebar-menu li {
   justify-content: center;
@@ -101,4 +87,12 @@
   background: rgba(255,255,255,0.12);
 }
 
-/* Keep dashboard content fixed (no shifting) — ensure you have matching rules in Dashboard CSS */
+
+
+
+
+
+
+
+
+

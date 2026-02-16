@@ -95,8 +95,10 @@ router.delete("/:id", protect, authorizeRoles("admin"), async (req, res) => {
       return res.status(404).json({ message: "Hospital not found" });
     }
     // remove related docs
-await Doctor.deleteMany({ hospital: hospId });
-await Appointment.deleteMany({ hospital: hospId });
+    const Doctor = require("../models/Doctor");
+    const Appointment = require("../models/Appointment");
+    await Doctor.deleteMany({ hospital: hospId });
+    await Appointment.deleteMany({ hospital: hospId });
 
 
     res.json({ success: true, message: "Hospital deleted" });

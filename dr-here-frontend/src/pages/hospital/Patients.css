@@ -1,0 +1,259 @@
+.patients-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.patients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.patients-header h1 {
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.patients-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.search-container {
+  flex-shrink: 0;
+}
+
+.search-input {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 300px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.no-patients {
+  text-align: center;
+  padding: 48px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.no-patients p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.patients-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.patients-table th {
+  background: #f9fafb;
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.patients-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.patients-table tr:hover {
+  background-color: #f9fafb;
+}
+
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.patient-id {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.contact-info {
+  font-size: 13px;
+}
+
+.contact-info .email {
+  color: #374151;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.contact-info .phone {
+  color: #6b7280;
+}
+
+.appointment-stats {
+  text-align: center;
+}
+
+.appointment-count {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.appointment-label {
+  display: block;
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.last-appointment-date {
+  font-size: 13px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.status-confirmed {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.status-completed {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.status-unknown {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.no-appointments {
+  color: #9ca3af;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.date-joined {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .patients-page {
+    padding: 16px;
+  }
+  
+  .patients-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .patients-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .patients-table {
+    min-width: 600px;
+  }
+  
+  .patients-table th,
+  .patients-table td {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .patients-header h1 {
+    font-size: 24px;
+  }
+  
+  .patient-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .appointment-count {
+    font-size: 18px;
+  }
+}

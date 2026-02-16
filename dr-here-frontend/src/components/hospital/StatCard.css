@@ -8,9 +8,17 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.stat-card.clickable {
+  cursor: pointer;
+}
+
 .stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0px 6px 16px rgba(0,0,0,0.10);
+}
+
+.stat-card.clickable:hover {
+  border-color: #006a3a;
 }
 
 .stat-card h3 {

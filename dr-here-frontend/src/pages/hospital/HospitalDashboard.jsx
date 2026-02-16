@@ -57,12 +57,12 @@ function HospitalDashboard() {
               value={statistics.todaysAppointments.toString()} 
             />
             <StatCard 
-              title="Total Doctors" 
-              value={statistics.totalDoctors.toString()} 
-            />
-            <StatCard 
               title="Total Patients" 
               value={statistics.totalPatients.toString()} 
+            />
+            <StatCard 
+              title="Total Doctors" 
+              value={statistics.totalDoctors.toString()} 
             />
           </div>
         )}

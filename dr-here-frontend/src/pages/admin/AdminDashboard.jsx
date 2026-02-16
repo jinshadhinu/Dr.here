@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 import StatCard from "../../components/hospital/StatCard.jsx";
 import axios from "axios";
 
 function AdminDashboard() {
+  const navigate = useNavigate();
   const [statistics, setStatistics] = useState({
     totalHospitals: 0,
     activeHospitals: 0,
     pendingHospitals: 0,
+    totalDoctors: 0,
+    totalPatients: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -35,11 +39,15 @@ function AdminDashboard() {
             totalHospitals: res.data.data.totalHospitals ?? 0,
             activeHospitals: res.data.data.activeHospitals ?? 0,
             pendingHospitals: res.data.data.pendingHospitals ?? 0,
+            totalDoctors: res.data.data.totalDoctors ?? 0,
+            totalPatients: res.data.data.totalPatients ?? 0,
           });
           console.log("Statistics set:", {
             totalHospitals: res.data.data.totalHospitals,
             activeHospitals: res.data.data.activeHospitals,
             pendingHospitals: res.data.data.pendingHospitals,
+            totalDoctors: res.data.data.totalDoctors,
+            totalPatients: res.data.data.totalPatients,
           });
         } else {
           console.error("Invalid response format:", res.data);
@@ -70,15 +78,21 @@ function AdminDashboard() {
           <div className="stats-container">
             <StatCard 
               title="Total Hospitals" 
-              value={statistics.totalHospitals.toString()} 
+              value={statistics.totalHospitals.toString()}
+              onClick={() => navigate("/admin/hospitals")}
             />
             <StatCard 
               title="Active Hospitals" 
-              value={statistics.activeHospitals.toString()} 
+              value={statistics.activeHospitals.toString()}
+              onClick={() => navigate("/admin/hospitals")}
             />
             <StatCard 
-              title="Pending Approvals" 
-              value={statistics.pendingHospitals.toString()} 
+              title="Total Doctors" 
+              value={statistics.totalDoctors.toString()}
+            />
+            <StatCard 
+              title="Total Patients" 
+              value={statistics.totalPatients.toString()}
             />
           </div>
         )}

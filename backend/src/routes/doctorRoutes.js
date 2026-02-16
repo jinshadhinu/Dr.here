@@ -8,7 +8,7 @@ const router = express.Router();
 // Add doctor (hospital or admin)
 router.post("/add", protect, authorizeRoles("admin","hospital"), async (req, res) => {
   try {
-    const { name, speciality, phone, email, hospitalId, slots } = req.body;
+    const { name, speciality, phone, email, hospitalId, departmentId, slots } = req.body;
 
     // validate basic fields
     if (!name || !hospitalId) return res.status(400).json({ message: "name and hospitalId required" });
@@ -21,6 +21,7 @@ router.post("/add", protect, authorizeRoles("admin","hospital"), async (req, res
     const doctor = await Doctor.create({
       name, speciality, phone, email,
       hospital: hospitalId,
+      department: departmentId || null,
       createdBy: req.user._id,
       slots: Array.isArray(slots) ? slots : []
     });
@@ -65,13 +66,27 @@ router.put("/:id", protect, authorizeRoles("admin","hospital"), async (req, res)
     // if (doc.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin")
     //   return res.status(403).json({ message: "Not allowed" });
 
-    const { name, speciality, phone, email, slots, status } = req.body;
+    const {
+      name,
+      speciality,
+      phone,
+      email,
+      slots,
+      status,
+      departmentId,
+      workingDays,
+    } = req.body;
     if (name !== undefined) doc.name = name;
     if (speciality !== undefined) doc.speciality = speciality;
     if (phone !== undefined) doc.phone = phone;
     if (email !== undefined) doc.email = email;
     if (status !== undefined) doc.status = status;
+    if (departmentId !== undefined) doc.department = departmentId || null;
     if (Array.isArray(slots)) doc.slots = slots;
+    if (Array.isArray(workingDays)) {
+      // store normalized lowercase day names
+      doc.workingDays = workingDays.map((d) => String(d).toLowerCase());
+    }
 
     const updated = await doc.save();
     res.json({ success: true, data: updated });

@@ -17,7 +17,6 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(2px);
-
 }
 
 /* GLASS CARD */
@@ -30,7 +29,7 @@
   backdrop-filter: blur(70px);
   -webkit-backdrop-filter: blur(10px);
   border: 1.5px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 12px 25px #006a3a(0, 0, 0, 0.25);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
   text-align: center;
   color: white;
 }
@@ -39,7 +38,7 @@
 .glass-title {
   font-size: 51px;
   color: #006a3a;
-  font-family:'Modern';
+  font-family: 'Modern';
   font-weight: 1000;
   margin-bottom: 5px;
 }
@@ -63,6 +62,7 @@
   outline: none;
   font-size: 15px;
   transition: 0.2s ease-in-out;
+  box-sizing: border-box;
 }
 
 .glass-input::placeholder {
@@ -86,11 +86,58 @@
   font-weight: 600;
   cursor: pointer;
   transition: 0.25s ease;
+  margin-top: 5px;
 }
 
 .glass-button:hover {
   background: #008f4a;
   transform: translateY(-2px);
+}
+
+/* FOOTER LINKS */
+.glass-footer-links {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.glass-footer-text {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.glass-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.2s ease;
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.glass-link:hover {
+  color: #006a3a;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #006a3a;
+  transform: translateY(-1px);
+}
+
+.glass-link-secondary {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 13px;
+  transition: 0.2s ease;
+  display: inline-block;
+  padding: 6px 0;
+}
+
+.glass-link-secondary:hover {
+  color: #006a3a;
+  text-decoration: underline;
 }
 
 /* FOOTER */
@@ -99,3 +146,4 @@
   opacity: 0.8;
   margin-top: 15px;
 }
+

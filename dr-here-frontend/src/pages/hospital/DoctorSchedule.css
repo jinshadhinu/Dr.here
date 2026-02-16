@@ -1,0 +1,276 @@
+.doctor-schedule-page {
+  padding: 20px;
+}
+
+.doctor-schedule-header h1 {
+  font-size: 32px;
+  color: #006a3a;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.doctor-schedule-header p {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 24px 0;
+}
+
+.doctor-schedule-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.doctor-list-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+}
+
+.doctor-list-panel h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.doctor-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.doctor-list-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  border: 1px solid transparent;
+}
+
+.doctor-list-item + .doctor-list-item {
+  margin-top: 6px;
+}
+
+.doctor-list-item:hover {
+  background: #f3f4f6;
+}
+
+.doctor-list-item.selected {
+  background: #ecfdf3;
+  border-color: #22c55e;
+}
+
+.doctor-name {
+  font-weight: 600;
+  color: #111827;
+}
+
+.doctor-speciality {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.doctor-config-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 20px 24px;
+}
+
+.doctor-summary-card {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.doctor-summary-card h2 {
+  margin: 0 0 4px 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.summary-line {
+  margin: 2px 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.summary-line.dept {
+  font-weight: 500;
+}
+
+.config-section {
+  margin-bottom: 24px;
+}
+
+.config-section h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.section-subtitle {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.days-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.day-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.day-pill.active {
+  background: #22c55e;
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #006a3a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #00512d;
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.slot-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+
+.slot-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-input label {
+  font-size: 13px;
+  color: #374151;
+}
+
+.slot-input input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.btn-secondary {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btn-secondary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.slots-list-section {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.slots-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.slot-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #374151;
+}
+
+.slot-item + .slot-item {
+  margin-top: 6px;
+}
+
+.loading {
+  padding: 16px 8px;
+  font-size: 14px;
+  color: #006a3a;
+  text-align: center;
+}
+
+.empty-state {
+  padding: 16px 8px;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.empty-state.small {
+  font-size: 13px;
+  padding: 10px 4px;
+}
+
+@media (max-width: 900px) {
+  .doctor-schedule-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-config-panel {
+    margin-top: 12px;
+  }
+}
+
+
+
+
+
+
+
+
+
+

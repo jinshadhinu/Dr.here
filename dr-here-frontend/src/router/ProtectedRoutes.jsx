@@ -21,3 +21,14 @@ export const HospitalRoute = ({ children }) => {
 
   return children;
 };
+
+export const PatientRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (!token || role !== "patient") {
+    return <Navigate to="/login-patient" replace />;
+  }
+
+  return children;
+};

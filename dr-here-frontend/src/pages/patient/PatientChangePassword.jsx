@@ -1,8 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import "./ChangePassword.css";
+import "./PatientChangePassword.css";
 
-function ChangePassword() {
+function PatientChangePassword() {
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -52,7 +52,7 @@ function ChangePassword() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        "http://localhost:5000/api/hospital/change-password",
+        "http://localhost:5000/api/patient/change-password",
         {
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
@@ -136,15 +136,7 @@ function ChangePassword() {
   );
 }
 
-export default ChangePassword;
-
-
-
-
-
-
-
-
+export default PatientChangePassword;
 
 
 

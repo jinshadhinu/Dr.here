@@ -1,16 +1,16 @@
-/* Same design as hospital sidebar */
+/* Base: overlay sidebar that does NOT push content */
 .sidebar {
   position: fixed;
-  top: 0;
+  top: 80px;                         /* Below navbar */
   left: 0;
-  height: 100vh;
+  height: calc(100vh - 80px);        /* Full height minus navbar */
   background: #006a3a;
   color: white;
   overflow: hidden;
   width: 70px;                       /* collapsed width */
   transition: width 240ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms;
   z-index: 1000;
-  padding-top: 0;
+  padding-top: 10px;
   box-shadow: none;
   will-change: width;
 }
@@ -21,8 +21,6 @@
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 
-/* Title removed */
-
 /* Menu */
 .sidebar-menu {
   list-style: none;
@@ -30,25 +28,38 @@
   padding: 10px 4px;
 }
 
-.sidebar-menu {
-  padding-top: 16px;
-}
-
 .sidebar-menu li {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 0;
   cursor: pointer;
   white-space: nowrap;
   border-radius: 8px;
   transition: background 160ms;
-  margin: 4px 8px;
+}
+
+.sidebar-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px;
+  width: 100%;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 160ms;
 }
 
 /* Hover highlight */
-.sidebar-menu li:hover {
+.sidebar-menu li:hover a {
   background: rgba(255,255,255,0.08);
+}
+
+/* Active state */
+.sidebar-menu li.active a {
+  background: rgba(255,255,255,0.15);
+  font-weight: 600;
 }
 
 /* Icon size & layout */
@@ -59,23 +70,14 @@
   flex-shrink: 0;               /* prevents distortion */
 }
 
-/* Text label (fade + slide) */
-.label {
-  opacity: 1;
-  transform: translateX(0);
-  transition: opacity 200ms ease, transform 200ms ease;
-}
-
-/* When collapsed, ensure label is not visible and doesn't cause layout changes */
-.sidebar.closed .label {
-  opacity: 0;
-  transform: translateX(-6px);
-  pointer-events: none;
-}
-
 /* When collapsed, center icons */
-.sidebar.closed .sidebar-menu li {
+.sidebar:not(.open) .sidebar-menu li {
   justify-content: center;
+}
+
+.sidebar:not(.open) .sidebar-menu li a {
+  justify-content: center;
+  padding: 22px 0;
 }
 
 /* Accessibility: focus state */

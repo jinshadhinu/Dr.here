@@ -1,4 +1,4 @@
-import "../hospital/navbar.css";
+import "./AdminNavbar.css";
 import { useNavigate } from "react-router-dom";
 
 function AdminNavbar() {

@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   background: #f4f6f8;
-  margin-left: 70px; /* Account for fixed sidebar width */
+  margin-left: 0; /* No margin needed - sidebar is below navbar */
 }
 
 /* TOP BAR */
@@ -31,4 +31,7 @@
   padding: 24px;
   overflow-y: auto;
   background: #f4f6f8;
+  margin-top: 80px; /* Account for fixed navbar height */
+  margin-left: 70px; /* Account for sidebar width */
+  min-height: calc(100vh - 80px);
 }

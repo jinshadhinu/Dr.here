@@ -142,8 +142,8 @@ function Hospitals() {
           >
             <option value="all">All statuses</option>
             <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
+            <option value="approved">Active</option>
+            <option value="rejected">Inactive</option>
           </select>
         </div>
 
@@ -169,7 +169,7 @@ function Hospitals() {
                     <td>{h.name}</td>
                     <td>{h.email}</td>
                     <td className={`status-pill ${h.status}`}>
-                      {h.status}
+                      {h.status === "approved" ? "Active" : h.status === "rejected" ? "Inactive" : h.status}
                     </td>
                     <td>
                       {h.createdAt
@@ -182,14 +182,14 @@ function Hospitals() {
                         onClick={() => handleStatusChange(h._id, "approve")}
                         disabled={h.status === "approved"}
                       >
-                        Approve
+                        Active
                       </button>
                       <button
                         className="btn-reject"
                         onClick={() => handleStatusChange(h._id, "reject")}
                         disabled={h.status === "rejected"}
                       >
-                        Reject
+                        Inactive
                       </button>
                       <button
                         className="btn-edit"

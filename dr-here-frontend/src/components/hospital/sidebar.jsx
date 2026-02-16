@@ -9,7 +9,8 @@ import {
   FaStar,
   FaCog,
   FaBuilding,
-  FaKey
+  FaKey,
+  FaCalendarPlus
 } from "react-icons/fa";
 
 function Sidebar() {
@@ -37,10 +38,6 @@ function Sidebar() {
 
   return (
     <div className={`sidebar ${isOpen ? "open" : ""}`}>
-      <div className="sidebar-title">
-        {isOpen ? "Hospital Panel" : "HP"}
-      </div>
-
       <ul className="sidebar-menu">
         <li className={isActive("/hospital/dashboard") ? "active" : ""}>
           <Link to="/hospital/dashboard">
@@ -52,9 +49,14 @@ function Sidebar() {
             <FaCalendarCheck /> {isOpen && "Appointments"}
           </Link>
         </li>
-        <li className={isActive("/hospital/departments") ? "active" : ""}>
-          <Link to="/hospital/departments">
-            <FaBuilding /> {isOpen && "Departments"}
+        <li className={isActive("/hospital/doctor-schedule") ? "active" : ""}>
+          <Link to="/hospital/doctor-schedule">
+            <FaCalendarPlus /> {isOpen && "Doctor Schedules"}
+          </Link>
+        </li>
+        <li className={isActive("/hospital/patients") ? "active" : ""}>
+          <Link to="/hospital/patients">
+            <FaUsers /> {isOpen && "Patients"}
           </Link>
         </li>
         <li className={isActive("/hospital/doctors") ? "active" : ""}>
@@ -62,9 +64,9 @@ function Sidebar() {
             <FaUserMd /> {isOpen && "Doctors"}
           </Link>
         </li>
-        <li className={isActive("/hospital/patients") ? "active" : ""}>
-          <Link to="/hospital/patients">
-            <FaUsers /> {isOpen && "Patients"}
+        <li className={isActive("/hospital/departments") ? "active" : ""}>
+          <Link to="/hospital/departments">
+            <FaBuilding /> {isOpen && "Departments"}
           </Link>
         </li>
         <li className={isActive("/hospital/reviews") ? "active" : ""}>
