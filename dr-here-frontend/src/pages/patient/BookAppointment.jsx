@@ -10,7 +10,8 @@ function BookAppointment() {
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
 
@@ -89,7 +90,8 @@ function BookAppointment() {
     try {
       setLoading(true);
       setSelectedDoctor(doctorId);
-      setSelectedSlot(null);
+      setSelectedDate(null);
+      setSelectedTimeSlot(null);
 
       // Fetch available slots for doctor
       const res = await axios.get(
@@ -107,8 +109,8 @@ function BookAppointment() {
   };
 
   const handleBookAppointment = async () => {
-    if (!selectedDoctor || !selectedSlot) {
-      alert("Please select a doctor and time slot");
+    if (!selectedDoctor || !selectedTimeSlot) {
+      alert("Please select a doctor, date, and time slot");
       return;
     }
 
@@ -119,7 +121,7 @@ function BookAppointment() {
         "http://localhost:5000/api/patient/book-appointment",
         {
           doctorId: selectedDoctor,
-          slotDate: selectedSlot.date,
+          slotDate: selectedTimeSlot.date,
         },
         {
           headers: {
@@ -134,7 +136,8 @@ function BookAppointment() {
         setSelectedHospital(null);
         setSelectedDepartment(null);
         setSelectedDoctor(null);
-        setSelectedSlot(null);
+        setSelectedDate(null);
+        setSelectedTimeSlot(null);
         setAvailableSlots([]);
         setDepartments([]);
         setDoctors([]);
@@ -150,11 +153,17 @@ function BookAppointment() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
+    return date.toLocaleDateString("en-US", {
       weekday: "short",
       year: "numeric",
       month: "short",
       day: "numeric",
+    });
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -241,22 +250,43 @@ function BookAppointment() {
         </div>
       )}
 
-      {/* Step 4: Select Time Slot */}
+      {/* Step 4: Select Date */}
       {selectedDoctor && availableSlots.length > 0 && (
         <div className="booking-step">
-          <h2>Step 4: Select Time Slot</h2>
-          <div className="slots-grid">
-            {availableSlots.map((slot, index) => (
+          <h2>Step 4: Select Date</h2>
+          <div className="dates-grid">
+            {[...new Set(availableSlots.map(slot => formatDate(slot.date)))].map((dateStr, idx) => (
               <button
-                key={index}
-                className={`slot-btn ${
-                  selectedSlot?.date === slot.date ? "selected" : ""
-                }`}
-                onClick={() => setSelectedSlot(slot)}
+                key={idx}
+                className={`date-btn ${selectedDate === dateStr ? "selected" : ""}`}
+                onClick={() => {
+                  setSelectedDate(dateStr);
+                  setSelectedTimeSlot(null);
+                }}
               >
-                {formatDate(slot.date)}
+                {dateStr}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step 5: Select Time */}
+      {selectedDoctor && selectedDate && (
+        <div className="booking-step">
+          <h2>Step 5: Select Time</h2>
+          <div className="times-grid">
+            {availableSlots
+              .filter(slot => formatDate(slot.date) === selectedDate)
+              .map((slot, idx) => (
+                <button
+                  key={idx}
+                  className={`time-btn ${selectedTimeSlot?.date === slot.date ? "selected" : ""}`}
+                  onClick={() => setSelectedTimeSlot(slot)}
+                >
+                  {formatTime(slot.date)}
+                </button>
+              ))}
           </div>
         </div>
       )}
@@ -268,7 +298,7 @@ function BookAppointment() {
       )}
 
       {/* Book Button */}
-      {selectedSlot && (
+      {selectedTimeSlot && (
         <div className="booking-actions">
           <button
             className="book-btn"
@@ -284,6 +314,14 @@ function BookAppointment() {
 }
 
 export default BookAppointment;
+
+
+
+
+
+
+
+
 
 
 

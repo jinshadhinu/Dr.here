@@ -24,7 +24,9 @@ function DoctorSchedule() {
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   const [slotDate, setSlotDate] = useState("");
-  const [slotTime, setSlotTime] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [slotDuration, setSlotDuration] = useState(2); // default 2 minutes
   const [savingWorkingDays, setSavingWorkingDays] = useState(false);
   const [addingSlot, setAddingSlot] = useState(false);
 
@@ -138,19 +140,33 @@ function DoctorSchedule() {
     }
   };
 
-  const handleAddSlot = async () => {
+  const handleGenerateSlots = async () => {
     if (!selectedDoctorId) {
       alert("Select a doctor first");
       return;
     }
-    if (!slotDate || !slotTime) {
-      alert("Please choose both date and time");
+    if (!slotDate || !startTime || !endTime || !slotDuration) {
+      alert("Please fill all fields");
       return;
     }
 
-    const isoDate = new Date(`${slotDate}T${slotTime}:00`);
-    if (Number.isNaN(isoDate.getTime())) {
-      alert("Invalid date/time");
+    // Parse times
+    const start = new Date(`${slotDate}T${startTime}:00`);
+    const end = new Date(`${slotDate}T${endTime}:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+      alert("Invalid start/end time");
+      return;
+    }
+
+    // Generate slots
+    const slotsToAdd = [];
+    let current = new Date(start);
+    while (current < end) {
+      slotsToAdd.push(new Date(current));
+      current = new Date(current.getTime() + slotDuration * 60000);
+    }
+    if (slotsToAdd.length === 0) {
+      alert("No slots generated. Check your times and duration.");
       return;
     }
 
@@ -163,8 +179,8 @@ function DoctorSchedule() {
       }
 
       const res = await axios.post(
-        `http://localhost:5000/api/doctors/${selectedDoctorId}/slots`,
-        { date: isoDate.toISOString() },
+        `http://localhost:5000/api/doctors/${selectedDoctorId}/slots/bulk`,
+        { slots: slotsToAdd.map((d) => d.toISOString()) },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -173,17 +189,18 @@ function DoctorSchedule() {
       );
 
       if (res.data.success) {
-        alert("Slot added successfully");
+        alert("Slots generated successfully");
         setSlotDate("");
-        setSlotTime("");
-        // Refresh slots
+        setStartTime("");
+        setEndTime("");
+        setSlotDuration(2);
         fetchSlotsForDoctor(selectedDoctorId);
       } else {
-        alert(res.data.message || "Failed to add slot");
+        alert(res.data.message || "Failed to generate slots");
       }
     } catch (err) {
-      console.error("Failed to add slot:", err);
-      alert(err.response?.data?.message || "Failed to add slot");
+      console.error("Failed to generate slots:", err);
+      alert(err.response?.data?.message || "Failed to generate slots");
     } finally {
       setAddingSlot(false);
     }
@@ -291,7 +308,7 @@ function DoctorSchedule() {
               <div className="config-section">
                 <h3>Open Appointment Slots</h3>
                 <p className="section-subtitle">
-                  Add specific date &amp; time slots patients can book.
+                  Generate slots by selecting a date, start time, end time, and slot duration (minutes).
                 </p>
                 <div className="slot-form">
                   <div className="slot-input">
@@ -303,20 +320,37 @@ function DoctorSchedule() {
                     />
                   </div>
                   <div className="slot-input">
-                    <label>Time</label>
+                    <label>Start Time</label>
                     <input
                       type="time"
-                      value={slotTime}
-                      onChange={(e) => setSlotTime(e.target.value)}
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="slot-input">
+                    <label>End Time</label>
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="slot-input">
+                    <label>Slot Duration (minutes)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={slotDuration}
+                      onChange={(e) => setSlotDuration(Number(e.target.value))}
                     />
                   </div>
                   <button
                     type="button"
                     className="btn-secondary"
-                    onClick={handleAddSlot}
+                    onClick={handleGenerateSlots}
                     disabled={addingSlot}
                   >
-                    {addingSlot ? "Adding..." : "Add Slot"}
+                    {addingSlot ? "Generating..." : "Generate Slots"}
                   </button>
                 </div>
 
@@ -325,7 +359,7 @@ function DoctorSchedule() {
                     <div className="loading">Loading slots...</div>
                   ) : slots.length === 0 ? (
                     <div className="empty-state small">
-                      <p>No open slots yet. Add a new slot above.</p>
+                      <p>No open slots yet. Generate slots above.</p>
                     </div>
                   ) : (
                     <ul className="slots-list">
@@ -347,6 +381,13 @@ function DoctorSchedule() {
 }
 
 export default DoctorSchedule;
+
+
+
+
+
+
+
 
 
 

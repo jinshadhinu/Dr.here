@@ -14,26 +14,53 @@ function Patients() {
   const fetchPatients = async () => {
     try {
       const token = localStorage.getItem("token");
+      console.log("Fetching patients with token:", token);
       
-      // First, let's check the debug endpoint
-      console.log("Fetching debug data...");
-      const debugRes = await axios.get("http://localhost:5000/api/hospital/debug", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("Debug data:", debugRes.data);
-      
-      // Now fetch patients
+      // Fetch all patients
       const res = await axios.get("http://localhost:5000/api/hospital/patients", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Patients data:", res.data);
+      
+      console.log("Hospital patients response:", res.data);
       
       if (res.data.success) {
-        setPatients(res.data.data || []);
+        const patients = res.data.data || [];
+        console.log("Patients array:", patients);
+        
+        // If no patients exist, create a test patient
+        if (patients.length === 0) {
+          console.log("No patients found, creating test patient...");
+          try {
+            await axios.post("http://localhost:5000/api/hospital/test-patient", {}, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            console.log("Test patient created, fetching patients again...");
+            
+            // Fetch patients again after creating test data
+            const newRes = await axios.get("http://localhost:5000/api/hospital/patients", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            console.log("Patients data after test:", newRes.data);
+            
+            if (newRes.data.success) {
+              setPatients(newRes.data.data || []);
+            }
+          } catch (testErr) {
+            console.error("Failed to create test patient:", testErr);
+            alert("No patients found and couldn't create test data: " + (testErr.response?.data?.message || testErr.message));
+          }
+        } else {
+          setPatients(patients);
+        }
+      } else {
+        console.error("Patients API returned error:", res.data);
+        alert("Failed to fetch patients: " + (res.data.message || "Unknown error"));
       }
     } catch (err) {
       console.error("Failed to fetch patients:", err);
@@ -87,6 +114,7 @@ function Patients() {
   );
 
   if (loading) {
+    console.log("Patients - Still loading, loading state:", loading);
     return (
       <div className="patients-page">
         <p>Loading patients...</p>
@@ -94,12 +122,15 @@ function Patients() {
     );
   }
 
+  console.log("Patients - Not loading, patients array:", patients);
+  console.log("Patients - Filtered patients:", filteredPatients);
+
   return (
     <div className="patients-page">
       <div className="patients-header">
         <div>
           <h1>Patients</h1>
-          <p>Manage all patients who have appointments with your hospital</p>
+          <p>View all registered patients in the system and their appointment history</p>
         </div>
         <div className="search-container">
           <input

@@ -5,6 +5,37 @@ const Hospital = require("../models/Hospital");
 
 const router = express.Router();
 
+// Bulk add slots to a doctor
+router.post("/:id/slots/bulk", protect, authorizeRoles("admin","hospital"), async (req, res) => {
+  try {
+    const { slots } = req.body; // array of ISO strings
+    if (!Array.isArray(slots) || slots.length === 0) {
+      return res.status(400).json({ message: "slots array is required" });
+    }
+
+    const doctor = await Doctor.findById(req.params.id);
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    // Prevent duplicate slots (same date/time)
+    const existingDates = new Set(doctor.slots.map(s => s.date.getTime()));
+    let addedCount = 0;
+    slots.forEach(dateStr => {
+      const dateObj = new Date(dateStr);
+      if (!Number.isNaN(dateObj.getTime()) && !existingDates.has(dateObj.getTime())) {
+        doctor.slots.push({ date: dateObj });
+        existingDates.add(dateObj.getTime());
+        addedCount++;
+      }
+    });
+
+    await doctor.save();
+    res.json({ success: true, added: addedCount, total: doctor.slots.length });
+  } catch (err) {
+    console.error("Bulk add slots error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Add doctor (hospital or admin)
 router.post("/add", protect, authorizeRoles("admin","hospital"), async (req, res) => {
   try {

@@ -88,7 +88,7 @@ function PatientLogin() {
 
         <div className="glass-footer-links">
           <Link to="/login" className="glass-link-secondary">
-            Continue as Admin / Hospital
+            Continue as Admin
           </Link>
         </div>
 

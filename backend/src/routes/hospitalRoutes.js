@@ -8,6 +8,23 @@ const router = express.Router();
 // Quick test to confirm mounting
 router.get("/test", (req, res) => res.json({ ok: true, where: "hospitals" }));
 
+// 📋 Get all hospitals (PUBLIC)
+router.get("/", async (req, res) => {
+  try {
+    const hospitals = await Hospital.find({ status: "approved" })
+      .select("name address city phone email")
+      .sort({ name: 1 });
+    
+    res.json({
+      success: true,
+      data: hospitals,
+    });
+  } catch (error) {
+    console.error("Get hospitals error:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // ➕ Add hospital (ADMIN only)
 router.post("/add", protect, authorizeRoles("admin"), async (req, res) => {
   try {

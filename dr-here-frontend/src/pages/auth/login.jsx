@@ -55,7 +55,7 @@ function Login() {
     >
       <div className="glass-card">
         <h3 className="glass-title">Dr.Here</h3>
-        <p className="glass-sub">Login</p>
+        <p className="glass-sub">Hospital Admin Login</p>
 
         <form onSubmit={handleSubmit}>
           <input
@@ -80,6 +80,17 @@ function Login() {
             Login
           </button>
         </form>
+
+        <div className="login-links">
+          <p>Are you a patient?</p>
+          <button 
+            type="button" 
+            className="link-button"
+            onClick={() => navigate('/login-patient')}
+          >
+            Patient Login
+          </button>
+        </div>
 
         <p className="glass-footer">© 2025 Dr.Here Portal</p>
       </div>

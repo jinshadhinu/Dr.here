@@ -19,21 +19,29 @@ function PatientProfile() {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("token");
+      console.log("Fetching patient profile with token:", token);
+      
       const res = await axios.get("http://localhost:5000/api/patient/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      
+      console.log("Patient profile response:", res.data);
+      
       if (res.data.success) {
         setProfileData({
           name: res.data.data.name || "",
           email: res.data.data.email || "",
           phone: res.data.data.phone || "+91",
         });
+      } else {
+        console.error("Profile API returned error:", res.data);
+        alert("Failed to load profile: " + (res.data.message || "Unknown error"));
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
-      alert("Failed to load profile data");
+      alert("Failed to load profile data: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -80,7 +88,6 @@ function PatientProfile() {
       const res = await axios.put(
         "http://localhost:5000/api/patient/profile",
         {
-          name: profileData.name,
           phone: profileData.phone !== "+91" ? profileData.phone : undefined,
         },
         {
@@ -114,12 +121,16 @@ function PatientProfile() {
   };
 
   if (loading) {
+    console.log("PatientProfile - Still loading, loading state:", loading);
     return (
       <div className="patient-profile">
         <p>Loading profile...</p>
       </div>
     );
   }
+
+  console.log("PatientProfile - Not loading, profileData:", profileData);
+  console.log("PatientProfile - Edit mode:", editMode);
 
   return (
     <div className="patient-profile">
@@ -143,9 +154,8 @@ function PatientProfile() {
               id="name"
               name="name"
               value={profileData.name}
-              onChange={handleChange}
-              disabled={!editMode}
-              className={editMode ? "editable" : "disabled"}
+              disabled
+              className="disabled"
               required
             />
           </div>

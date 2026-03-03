@@ -12,15 +12,15 @@ import ChangePassword from "../pages/hospital/ChangePassword";
 import Departments from "../pages/hospital/Departments";
 import Doctors from "../pages/hospital/Doctors";
 import Appointments from "../pages/hospital/Appointments";
-import Patients from "../pages/hospital/Patients";
 import DoctorSchedule from "../pages/hospital/DoctorSchedule";
+import Patients from "../pages/hospital/Patients";
 import { AdminRoute, HospitalRoute, PatientRoute } from "./ProtectedRoutes";
 import PatientLayout from "../components/patient/PatientLayout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
 import PatientAppointments from "../pages/patient/PatientAppointments";
-import PatientProfile from "../pages/patient/PatientProfile";
 import PatientChangePassword from "../pages/patient/PatientChangePassword";
+import PatientProfile from "../pages/patient/PatientProfile";
 
 function AppRouter() {
   return (
@@ -73,9 +73,9 @@ function AppRouter() {
           }
         >
           <Route path="dashboard" element={<PatientDashboard />} />
+          <Route path="profile" element={<PatientProfile />} />
           <Route path="book-appointment" element={<BookAppointment />} />
           <Route path="appointments" element={<PatientAppointments />} />
-          <Route path="profile" element={<PatientProfile />} />
           <Route path="change-password" element={<PatientChangePassword />} />
         </Route>
       </Routes>

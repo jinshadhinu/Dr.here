@@ -175,7 +175,7 @@ router.put("/appointments/:id/status", protect, authorizeRoles("hospital"), asyn
   }
 });
 
-// � Debug endpoint to check database content
+// Debug endpoint to check database content
 router.get("/debug", protect, authorizeRoles("hospital"), async (req, res) => {
   try {
     const hospitalId = req.user.id;
@@ -193,6 +193,21 @@ router.get("/debug", protect, authorizeRoles("hospital"), async (req, res) => {
     const patientIds = await Appointment.distinct("patient", {
       hospital: hospitalId,
       status: { $ne: "cancelled" },
+    });
+
+    console.log("Debug Info:", {
+      hospitalId,
+      totalUsers: allUsers.length,
+      totalPatients: patients.length,
+      totalAppointments: appointments.length,
+      patientIdsFromAppointments: patientIds.length,
+      appointments: appointments.map(apt => ({
+        id: apt._id,
+        patient: apt.patient,
+        doctor: apt.doctor,
+        status: apt.status,
+        date: apt.appointmentDate
+      }))
     });
 
     res.json({
@@ -219,26 +234,82 @@ router.get("/debug", protect, authorizeRoles("hospital"), async (req, res) => {
   }
 });
 
-// �👥 Get all patients for hospital (HOSPITAL only)
+// Test endpoint to create sample appointment
+router.post("/test-appointment", protect, authorizeRoles("hospital"), async (req, res) => {
+  try {
+    const hospitalId = req.user.id;
+    
+    // Find a patient and doctor for this hospital
+    const patient = await User.findOne({ role: "patient" });
+    const doctor = await Doctor.findOne({ hospital: hospitalId });
+    
+    if (!patient || !doctor) {
+      return res.status(400).json({ 
+        message: "Need at least one patient and one doctor to create test appointment" 
+      });
+    }
+    
+    // Create a test appointment
+    const appointment = await Appointment.create({
+      patient: patient._id,
+      doctor: doctor._id,
+      hospital: hospitalId,
+      appointmentDate: new Date(),
+      status: "pending",
+      notes: "Test appointment for debugging"
+    });
+    
+    res.json({
+      success: true,
+      message: "Test appointment created successfully",
+      data: appointment
+    });
+  } catch (error) {
+    console.error("Test appointment error:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Test endpoint to create sample patient
+router.post("/test-patient", protect, authorizeRoles("hospital"), async (req, res) => {
+  try {
+    // Create a test patient
+    const patient = await User.create({
+      name: "Test Patient " + Math.floor(Math.random() * 1000),
+      email: "testpatient" + Math.floor(Math.random() * 1000) + "@test.com",
+      password: "password123",
+      role: "patient",
+      phone: "+91" + Math.floor(Math.random() * 10000000000)
+    });
+    
+    res.json({
+      success: true,
+      message: "Test patient created successfully",
+      data: patient
+    });
+  } catch (error) {
+    console.error("Test patient error:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all patients for hospital (HOSPITAL only)
 router.get("/patients", protect, authorizeRoles("hospital"), async (req, res) => {
   try {
     const hospitalId = req.user.id;
     
-    // Get all unique patient IDs from appointments for this hospital
-    const patientIds = await Appointment.distinct("patient", {
-      hospital: hospitalId,
-      status: { $ne: "cancelled" },
-    });
+    console.log("Fetching all patients for hospital:", hospitalId);
+    
+    // Get ALL patients in the system (not just those with appointments)
+    const allPatients = await User.find({ role: "patient" })
+      .select("name email phone createdAt")
+      .sort({ createdAt: -1 });
 
-    // Get patient details
-    const patients = await User.find({
-      _id: { $in: patientIds },
-      role: "patient"
-    }).select("name email phone createdAt");
+    console.log("Found all patients:", allPatients.length);
 
-    // Get appointment count for each patient
+    // Get appointment statistics for each patient
     const patientsWithStats = await Promise.all(
-      patients.map(async (patient) => {
+      allPatients.map(async (patient) => {
         const appointmentCount = await Appointment.countDocuments({
           patient: patient._id,
           hospital: hospitalId,
@@ -261,6 +332,8 @@ router.get("/patients", protect, authorizeRoles("hospital"), async (req, res) =>
         };
       })
     );
+
+    console.log("Patients with stats:", patientsWithStats.length);
 
     res.json({
       success: true,

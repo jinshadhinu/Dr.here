@@ -19,3 +19,134 @@
   flex-wrap: wrap;
 }
 
+/* Nearby Hospitals Section */
+.nearby-hospitals-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+}
+
+.nearby-hospitals-section h2 {
+  color: #1f2937;
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.search-location {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.location-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.location-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-button {
+  padding: 12px 24px;
+  background: #006a3a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.search-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.hospitals-list h3 {
+  color: #374151;
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.hospitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.hospital-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.hospital-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hospital-card h4 {
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.hospital-address {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.hospital-city {
+  color: #059669;
+  font-size: 13px;
+  margin: 4px 0;
+  font-weight: 500;
+}
+
+.hospital-phone {
+  color: #4b5563;
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.book-appointment-btn {
+  width: 100%;
+  padding: 10px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background-color 0.2s;
+}
+
+.book-appointment-btn:hover {
+  background: #059669;
+}
+
