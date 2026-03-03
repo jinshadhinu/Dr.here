@@ -19,7 +19,6 @@ import PatientLayout from "../components/patient/PatientLayout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
 import PatientAppointments from "../pages/patient/PatientAppointments";
-import PatientChangePassword from "../pages/patient/PatientChangePassword";
 import PatientProfile from "../pages/patient/PatientProfile";
 
 function AppRouter() {
@@ -76,7 +75,6 @@ function AppRouter() {
           <Route path="profile" element={<PatientProfile />} />
           <Route path="book-appointment" element={<BookAppointment />} />
           <Route path="appointments" element={<PatientAppointments />} />
-          <Route path="change-password" element={<PatientChangePassword />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -14,6 +14,8 @@ function BookAppointment() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
+  const [advanceAmount, setAdvanceAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
 
   useEffect(() => {
     fetchHospitals();
@@ -92,6 +94,7 @@ function BookAppointment() {
       setSelectedDoctor(doctorId);
       setSelectedDate(null);
       setSelectedTimeSlot(null);
+      setAdvanceAmount("");
 
       // Fetch available slots for doctor
       const res = await axios.get(
@@ -114,6 +117,12 @@ function BookAppointment() {
       return;
     }
 
+    const numericAdvance = Number(advanceAmount);
+    if (!advanceAmount || Number.isNaN(numericAdvance) || numericAdvance < 100) {
+      alert("Advance payment of at least 100 is required.");
+      return;
+    }
+
     try {
       setBooking(true);
       const token = localStorage.getItem("token");
@@ -122,6 +131,8 @@ function BookAppointment() {
         {
           doctorId: selectedDoctor,
           slotDate: selectedTimeSlot.date,
+          advanceAmount: numericAdvance,
+          paymentMethod,
         },
         {
           headers: {
@@ -131,13 +142,14 @@ function BookAppointment() {
       );
 
       if (res.data.success) {
-        alert("Appointment booked successfully!");
+        alert("Appointment booked successfully with advance payment!");
         // Reset form
         setSelectedHospital(null);
         setSelectedDepartment(null);
         setSelectedDoctor(null);
         setSelectedDate(null);
         setSelectedTimeSlot(null);
+        setAdvanceAmount("");
         setAvailableSlots([]);
         setDepartments([]);
         setDoctors([]);
@@ -300,6 +312,39 @@ function BookAppointment() {
       {/* Book Button */}
       {selectedTimeSlot && (
         <div className="booking-actions">
+          <div className="payment-section">
+            <h3>Advance Payment (Required)</h3>
+            <p className="payment-note">
+              An advance payment of at least 100 is required to confirm your appointment.
+              If you choose Cash, you will pay this amount at the hospital reception (no online transfer happens in the app).
+            </p>
+            <div className="payment-fields">
+              <div className="field">
+                <label htmlFor="advanceAmount">Advance Amount (min 100)</label>
+                <input
+                  id="advanceAmount"
+                  type="number"
+                  min="100"
+                  value={advanceAmount}
+                  onChange={(e) => setAdvanceAmount(e.target.value)}
+                  placeholder="Enter amount"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="paymentMethod">Payment Method</label>
+                <select
+                  id="paymentMethod"
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                >
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="online">Online</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
           <button
             className="book-btn"
             onClick={handleBookAppointment}

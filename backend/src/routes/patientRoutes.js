@@ -6,6 +6,7 @@ const Hospital = require("../models/Hospital");
 const Doctor = require("../models/Doctor");
 const Department = require("../models/Department");
 const Appointment = require("../models/Appointment");
+const Payment = require("../models/Payment");
 const User = require("../models/User");
 
 // Get all approved hospitals (PUBLIC - for patients to browse)
@@ -109,11 +110,25 @@ router.get("/appointments", protect, authorizeRoles("patient"), async (req, res)
 // Book an appointment (PATIENT only)
 router.post("/book-appointment", protect, authorizeRoles("patient"), async (req, res) => {
   try {
-    const { doctorId, slotDate } = req.body;
+    const { doctorId, slotDate, advanceAmount, paymentMethod } = req.body;
     const patientId = req.user.id;
 
     if (!doctorId || !slotDate) {
       return res.status(400).json({ message: "Doctor ID and slot date are required" });
+    }
+
+    // Require advance payment with minimum amount
+    const numericAdvanceAmount = Number(advanceAmount);
+    if (
+      advanceAmount === undefined ||
+      advanceAmount === null ||
+      advanceAmount === "" ||
+      Number.isNaN(numericAdvanceAmount) ||
+      numericAdvanceAmount < 100
+    ) {
+      return res.status(400).json({
+        message: "Advance payment of at least 100 is required to book an appointment",
+      });
     }
 
     const doctor = await Doctor.findById(doctorId);
@@ -150,10 +165,44 @@ router.post("/book-appointment", protect, authorizeRoles("patient"), async (req,
       status: "pending",
     });
 
+    // Create a mandatory advance payment record
+    let payment;
+    const method = paymentMethod || "cash";
+    const paymentStatus = method === "cash" ? "pending" : "success";
+
+    try {
+      payment = await Payment.create({
+        patient: patientId,
+        appointment: appointment._id,
+        doctor: doctorId,
+        hospital: doctor.hospital,
+        amount: numericAdvanceAmount,
+        method,
+        type: "advance",
+        status: paymentStatus,
+        notes:
+          method === "cash"
+            ? "Advance to be collected in cash at hospital reception"
+            : "",
+      });
+    } catch (paymentError) {
+      // If payment fails, cancel the appointment and free the slot
+      await Appointment.findByIdAndDelete(appointment._id);
+      slot.isBooked = false;
+      await doctor.save();
+      console.error("Advance payment creation failed:", paymentError);
+      return res
+        .status(500)
+        .json({ message: "Failed to process advance payment. Appointment not booked." });
+    }
+
     res.json({
       success: true,
-      message: "Appointment booked successfully",
-      data: appointment,
+      message: "Appointment booked and advance payment recorded successfully",
+      data: {
+        appointment,
+        payment,
+      },
     });
   } catch (error) {
     console.error("Book appointment error:", error);
@@ -175,30 +224,84 @@ router.get("/profile", protect, authorizeRoles("patient"), async (req, res) => {
   }
 });
 
-// Update patient profile (PATIENT only)
+// Update patient profile and/or password (PATIENT only)
 router.put("/profile", protect, authorizeRoles("patient"), async (req, res) => {
   try {
-    const { name, phone } = req.body;
+    const { name, phone, currentPassword, newPassword } = req.body;
     const patientId = req.user.id;
 
-    // Find patient
+    // Find patient (includes password)
     const patient = await User.findById(patientId);
     if (!patient) {
       return res.status(404).json({ message: "Patient not found" });
     }
 
-    // Update fields if provided
-    if (name) patient.name = name;
-    if (phone !== undefined) patient.phone = phone;
+    let profileChanged = false;
+    let passwordChanged = false;
 
-    const updatedPatient = await patient.save();
+    // Update profile fields if provided
+    if (name && name !== patient.name) {
+      patient.name = name;
+      profileChanged = true;
+    }
+    if (phone !== undefined && phone !== patient.phone) {
+      patient.phone = phone;
+      profileChanged = true;
+    }
+
+    // Handle optional password change
+    if (currentPassword || newPassword) {
+      if (!currentPassword || !newPassword) {
+        return res
+          .status(400)
+          .json({ message: "Current password and new password are required" });
+      }
+
+      if (newPassword.length < 6) {
+        return res
+          .status(400)
+          .json({ message: "New password must be at least 6 characters long" });
+      }
+
+      if (currentPassword === newPassword) {
+        return res
+          .status(400)
+          .json({ message: "New password must be different from current password" });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, patient.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      patient.password = hashedPassword;
+      passwordChanged = true;
+    }
+
+    // If nothing changed, just return current profile
+    if (!profileChanged && !passwordChanged) {
+      const existingPatient = await User.findById(patientId).select("-password");
+      return res.json({
+        success: true,
+        message: "No changes detected",
+        data: existingPatient,
+      });
+    }
+
+    await patient.save();
 
     // Return updated patient without password
     const patientResponse = await User.findById(patientId).select("-password");
 
     res.json({
       success: true,
-      message: "Profile updated successfully",
+      message: passwordChanged
+        ? profileChanged
+          ? "Profile and password updated successfully"
+          : "Password updated successfully"
+        : "Profile updated successfully",
       data: patientResponse,
     });
   } catch (error) {

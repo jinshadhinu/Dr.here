@@ -7,7 +7,6 @@ import {
   FaCalendarCheck,
   FaUser,
   FaCog,
-  FaKey
 } from "react-icons/fa";
 
 function PatientSidebar() {
@@ -54,11 +53,6 @@ function PatientSidebar() {
         <li className={isActive("/patient/profile") ? "active" : ""}>
           <Link to="/patient/profile">
             <FaUser /> {isOpen && "My Profile"}
-          </Link>
-        </li>
-        <li className={isActive("/patient/change-password") ? "active" : ""}>
-          <Link to="/patient/change-password">
-            <FaKey /> {isOpen && "Change Password"}
           </Link>
         </li>
         <li className={isActive("/patient/settings") ? "active" : ""}>

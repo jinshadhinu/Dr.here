@@ -12,6 +12,15 @@ function PatientProfile() {
   const [updating, setUpdating] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -70,6 +79,15 @@ function PatientProfile() {
     });
   };
 
+  const handlePasswordChange = (e) => {
+    setPasswordForm({
+      ...passwordForm,
+      [e.target.name]: e.target.value,
+    });
+    setPasswordError("");
+    setPasswordSuccess("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -98,7 +116,7 @@ function PatientProfile() {
       );
 
       if (res.data.success) {
-        alert("Profile updated successfully!");
+        alert(res.data.message || "Profile updated successfully!");
         setEditMode(false);
         // Update the profile data with the response
         setProfileData({
@@ -112,6 +130,68 @@ function PatientProfile() {
       alert("Failed to update profile: " + (err.response?.data?.message || err.message));
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (
+      !passwordForm.currentPassword ||
+      !passwordForm.newPassword ||
+      !passwordForm.confirmPassword
+    ) {
+      setPasswordError("All fields are required");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New password and confirm password do not match");
+      return;
+    }
+
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      setPasswordError("New password must be different from current password");
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.put(
+        "http://localhost:5000/api/patient/profile",
+        {
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.data.success) {
+        setPasswordSuccess(res.data.message || "Password changed successfully!");
+        setPasswordForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || "Failed to change password";
+      setPasswordError(errorMessage);
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -136,7 +216,7 @@ function PatientProfile() {
     <div className="patient-profile">
       <div className="profile-header">
         <h1>My Profile</h1>
-        <p>Manage your personal information and contact details</p>
+        <p>Manage your personal information, contact details, and password</p>
       </div>
 
       <div className="profile-card">
@@ -218,6 +298,63 @@ function PatientProfile() {
               </div>
             )}
           </div>
+        </form>
+      </div>
+
+      <div className="profile-card password-card">
+        <h2>Change Password</h2>
+        <p className="password-subtitle">Update your account password</p>
+
+        <form onSubmit={handlePasswordSubmit} className="password-form">
+          {passwordError && <div className="error-message">{passwordError}</div>}
+          {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+
+          <div className="form-group">
+            <label htmlFor="currentPassword">Current Password</label>
+            <input
+              type="password"
+              id="currentPassword"
+              name="currentPassword"
+              value={passwordForm.currentPassword}
+              onChange={handlePasswordChange}
+              placeholder="Enter current password"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="newPassword">New Password</label>
+            <input
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              value={passwordForm.newPassword}
+              onChange={handlePasswordChange}
+              placeholder="Enter new password (min 6 characters)"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm New Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={passwordForm.confirmPassword}
+              onChange={handlePasswordChange}
+              placeholder="Confirm new password"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn-save"
+            disabled={passwordLoading}
+          >
+            {passwordLoading ? "Changing Password..." : "Change Password"}
+          </button>
         </form>
       </div>
     </div>
