@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import "./StatCard.css";
 
 function StatCard({ title, value, onClick }) {
-  const navigate = useNavigate();
+  useNavigate();
 
   const handleClick = () => {
     if (onClick) {

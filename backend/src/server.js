@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/db");
 const adminRoutes = require("./routes/adminRoutes");
 const hospitalRoutes = require("./routes/hospitalRoutes");
@@ -11,7 +12,14 @@ const departmentRoutes = require("./routes/departmentRoutes");
 const hospitalDoctorRoutes = require("./routes/hospitalDoctorRoutes");
 const patientRoutes = require("./routes/patientRoutes");
 
-dotenv.config();
+// Always load .env from the backend root, regardless of where Node is started
+dotenv.config({
+  path: path.join(__dirname, "..", ".env"),
+});
+console.log("Loaded Razorpay config:", {
+  hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+  hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
+});
 connectDB();
 
 const app = express();

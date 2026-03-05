@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 const Hospital = require("../models/Hospital");
 const Doctor = require("../models/Doctor");
@@ -8,6 +9,37 @@ const Department = require("../models/Department");
 const Appointment = require("../models/Appointment");
 const Payment = require("../models/Payment");
 const User = require("../models/User");
+let Razorpay;
+
+function getRazorpayInstance() {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) return null;
+
+  if (!Razorpay) {
+    // Lazy require so the app still starts even if dependency isn't installed yet.
+    // (We'll install it as part of this change.)
+    // eslint-disable-next-line global-require
+    Razorpay = require("razorpay");
+  }
+
+  return new Razorpay({ key_id: keyId, key_secret: keySecret });
+}
+
+async function freeDoctorSlotIfNeeded(doctorId, slotDate) {
+  const doctor = await Doctor.findById(doctorId);
+  if (!doctor) return;
+  const slotDateObj = new Date(slotDate);
+  const slot = doctor.slots.find((s) => {
+    const slotTime = new Date(s.date).getTime();
+    const requestedTime = slotDateObj.getTime();
+    const timeDiff = Math.abs(slotTime - requestedTime);
+    return timeDiff < 60000 && s.isBooked;
+  });
+  if (!slot) return;
+  slot.isBooked = false;
+  await doctor.save();
+}
 
 // Get all approved hospitals (PUBLIC - for patients to browse)
 router.get("/hospitals", async (req, res) => {
@@ -131,6 +163,14 @@ router.post("/book-appointment", protect, authorizeRoles("patient"), async (req,
       });
     }
 
+    const method = paymentMethod || "cash";
+    if (method === "online") {
+      return res.status(400).json({
+        message:
+          "Online advance payment must be completed via Razorpay. Please click 'Book Appointment' after selecting Payment Method = Online.",
+      });
+    }
+
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
       return res.status(404).json({ message: "Doctor not found" });
@@ -167,7 +207,6 @@ router.post("/book-appointment", protect, authorizeRoles("patient"), async (req,
 
     // Create a mandatory advance payment record
     let payment;
-    const method = paymentMethod || "cash";
     const paymentStatus = method === "cash" ? "pending" : "success";
 
     try {
@@ -209,6 +248,271 @@ router.post("/book-appointment", protect, authorizeRoles("patient"), async (req,
     res.status(500).json({ message: error.message });
   }
 });
+
+// Create Razorpay order for advance payment (PATIENT only)
+router.post(
+  "/razorpay/create-order",
+  protect,
+  authorizeRoles("patient"),
+  async (req, res) => {
+    let doctor;
+    let appointment;
+    let payment;
+
+    try {
+      const { doctorId, slotDate, advanceAmount } = req.body;
+      const patientId = req.user.id;
+
+      if (!doctorId || !slotDate) {
+        return res
+          .status(400)
+          .json({ message: "Doctor ID and slot date are required" });
+      }
+
+      const numericAdvanceAmount = Number(advanceAmount);
+      if (
+        advanceAmount === undefined ||
+        advanceAmount === null ||
+        advanceAmount === "" ||
+        Number.isNaN(numericAdvanceAmount) ||
+        numericAdvanceAmount < 100
+      ) {
+        return res.status(400).json({
+          message: "Advance payment of at least 100 is required to book an appointment",
+        });
+      }
+
+      const razorpay = getRazorpayInstance();
+      if (!razorpay) {
+        return res.status(500).json({
+          message:
+            "Razorpay is not configured on the server. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.",
+        });
+      }
+
+      doctor = await Doctor.findById(doctorId);
+      if (!doctor) {
+        return res.status(404).json({ message: "Doctor not found" });
+      }
+
+      // Find the slot
+      const slotDateObj = new Date(slotDate);
+      const slot = doctor.slots.find((s) => {
+        const slotTime = new Date(s.date).getTime();
+        const requestedTime = slotDateObj.getTime();
+        const timeDiff = Math.abs(slotTime - requestedTime);
+        return timeDiff < 60000 && !s.isBooked;
+      });
+
+      if (!slot) {
+        return res
+          .status(400)
+          .json({ message: "Slot not available or already booked" });
+      }
+
+      // Reserve slot before payment starts
+      slot.isBooked = true;
+      await doctor.save();
+
+      appointment = await Appointment.create({
+        patient: patientId,
+        doctor: doctorId,
+        hospital: doctor.hospital,
+        appointmentDate: slotDateObj,
+        status: "pending",
+      });
+
+      payment = await Payment.create({
+        patient: patientId,
+        appointment: appointment._id,
+        doctor: doctorId,
+        hospital: doctor.hospital,
+        amount: numericAdvanceAmount,
+        method: "online",
+        type: "advance",
+        status: "pending",
+        provider: "razorpay",
+        currency: "INR",
+        notes: "Awaiting Razorpay payment confirmation",
+      });
+
+      const order = await razorpay.orders.create({
+        amount: Math.round(numericAdvanceAmount * 100),
+        currency: "INR",
+        receipt: `payment_${payment._id}`,
+        notes: {
+          appointmentId: String(appointment._id),
+          paymentId: String(payment._id),
+          patientId: String(patientId),
+          doctorId: String(doctorId),
+        },
+      });
+
+      payment.razorpayOrderId = order.id;
+      await payment.save();
+
+      res.json({
+        success: true,
+        message: "Razorpay order created",
+        data: {
+          keyId: process.env.RAZORPAY_KEY_ID,
+          order,
+          appointmentId: appointment._id,
+          paymentId: payment._id,
+        },
+      });
+    } catch (error) {
+      console.error("Razorpay create order error:", error);
+
+      // Rollback on any failure
+      try {
+        if (payment?._id) await Payment.findByIdAndDelete(payment._id);
+        if (appointment?._id) await Appointment.findByIdAndDelete(appointment._id);
+        if (doctor?._id && req.body?.slotDate) {
+          await freeDoctorSlotIfNeeded(doctor._id, req.body.slotDate);
+        }
+      } catch (rollbackError) {
+        console.error("Razorpay create order rollback error:", rollbackError);
+      }
+
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+// Verify Razorpay payment signature (PATIENT only)
+router.post(
+  "/razorpay/verify",
+  protect,
+  authorizeRoles("patient"),
+  async (req, res) => {
+    try {
+      const {
+        paymentId,
+        razorpay_order_id: razorpayOrderId,
+        razorpay_payment_id: razorpayPaymentId,
+        razorpay_signature: razorpaySignature,
+      } = req.body;
+
+      if (!paymentId || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+        return res.status(400).json({ message: "Missing Razorpay verification fields" });
+      }
+
+      const payment = await Payment.findById(paymentId);
+      if (!payment) return res.status(404).json({ message: "Payment not found" });
+
+      if (String(payment.patient) !== String(req.user.id)) {
+        return res.status(403).json({ message: "Not authorized to verify this payment" });
+      }
+
+      if (payment.method !== "online" || payment.provider !== "razorpay") {
+        return res.status(400).json({ message: "This payment is not a Razorpay online payment" });
+      }
+
+      if (payment.status !== "pending") {
+        return res.status(400).json({ message: `Payment is already ${payment.status}` });
+      }
+
+      if (!payment.razorpayOrderId || payment.razorpayOrderId !== razorpayOrderId) {
+        return res.status(400).json({ message: "Razorpay order ID mismatch" });
+      }
+
+      const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      if (!keySecret) {
+        return res.status(500).json({ message: "Razorpay secret is not configured on the server" });
+      }
+
+      const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+      const expectedSignature = crypto
+        .createHmac("sha256", keySecret)
+        .update(body)
+        .digest("hex");
+
+      if (expectedSignature !== razorpaySignature) {
+        payment.status = "failed";
+        payment.razorpayPaymentId = razorpayPaymentId;
+        payment.razorpaySignature = razorpaySignature;
+        await payment.save();
+
+        const appointment = await Appointment.findById(payment.appointment);
+        if (appointment) {
+          appointment.status = "cancelled";
+          await appointment.save();
+          await freeDoctorSlotIfNeeded(appointment.doctor, appointment.appointmentDate);
+        }
+
+        return res.status(400).json({ message: "Invalid Razorpay signature" });
+      }
+
+      payment.status = "success";
+      payment.razorpayPaymentId = razorpayPaymentId;
+      payment.razorpaySignature = razorpaySignature;
+      await payment.save();
+
+      const appointment = await Appointment.findById(payment.appointment);
+      if (appointment) {
+        appointment.status = "confirmed";
+        await appointment.save();
+      }
+
+      res.json({
+        success: true,
+        message: "Payment verified and appointment confirmed",
+        data: {
+          payment,
+          appointment,
+        },
+      });
+    } catch (error) {
+      console.error("Razorpay verify error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+// Cancel a pending Razorpay payment attempt (PATIENT only)
+router.post(
+  "/razorpay/cancel",
+  protect,
+  authorizeRoles("patient"),
+  async (req, res) => {
+    try {
+      const { paymentId } = req.body;
+      if (!paymentId) return res.status(400).json({ message: "paymentId is required" });
+
+      const payment = await Payment.findById(paymentId);
+      if (!payment) return res.status(404).json({ message: "Payment not found" });
+
+      if (String(payment.patient) !== String(req.user.id)) {
+        return res.status(403).json({ message: "Not authorized to cancel this payment" });
+      }
+
+      if (payment.method !== "online" || payment.provider !== "razorpay") {
+        return res.status(400).json({ message: "This payment is not a Razorpay online payment" });
+      }
+
+      if (payment.status !== "pending") {
+        return res.status(400).json({ message: `Payment is already ${payment.status}` });
+      }
+
+      payment.status = "failed";
+      payment.notes = "Payment attempt cancelled by user";
+      await payment.save();
+
+      const appointment = await Appointment.findById(payment.appointment);
+      if (appointment && appointment.status !== "confirmed") {
+        appointment.status = "cancelled";
+        await appointment.save();
+        await freeDoctorSlotIfNeeded(appointment.doctor, appointment.appointmentDate);
+      }
+
+      res.json({ success: true, message: "Payment cancelled" });
+    } catch (error) {
+      console.error("Razorpay cancel error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 // Get patient profile (PATIENT only)
 router.get("/profile", protect, authorizeRoles("patient"), async (req, res) => {

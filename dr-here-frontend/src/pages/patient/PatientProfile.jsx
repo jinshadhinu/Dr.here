@@ -72,13 +72,6 @@ function PatientProfile() {
     });
   };
 
-  const handleChange = (e) => {
-    setProfileData({
-      ...profileData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const handlePasswordChange = (e) => {
     setPasswordForm({
       ...passwordForm,

@@ -6,6 +6,7 @@ import AdminLayout from "../components/admin/AdminLayout";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import Hospitals from "../pages/admin/Hospitals";
 import AddHospital from "../pages/admin/AddHospital";
+import AdminSettings from "../pages/admin/AdminSettings.jsx";
 import HospitalLayout from "../components/hospital/HospitalLayout";
 import HospitalDashboard from "../pages/hospital/HospitalDashboard";
 import ChangePassword from "../pages/hospital/ChangePassword";
@@ -13,6 +14,7 @@ import Departments from "../pages/hospital/Departments";
 import Doctors from "../pages/hospital/Doctors";
 import Appointments from "../pages/hospital/Appointments";
 import DoctorSchedule from "../pages/hospital/DoctorSchedule";
+import HospitalSettings from "../pages/hospital/HospitalSettings.jsx";
 import Patients from "../pages/hospital/Patients";
 import { AdminRoute, HospitalRoute, PatientRoute } from "./ProtectedRoutes";
 import PatientLayout from "../components/patient/PatientLayout";
@@ -20,6 +22,7 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import BookAppointment from "../pages/patient/BookAppointment";
 import PatientAppointments from "../pages/patient/PatientAppointments";
 import PatientProfile from "../pages/patient/PatientProfile";
+import PatientSettings from "../pages/patient/PatientSettings.jsx";
 
 function AppRouter() {
   return (
@@ -42,6 +45,7 @@ function AppRouter() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="hospitals" element={<Hospitals />} />
           <Route path="add-hospital" element={<AddHospital />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
 
         {/* HOSPITAL */}
@@ -60,6 +64,7 @@ function AppRouter() {
           <Route path="departments" element={<Departments />} />
           <Route path="doctors" element={<Doctors />} />
           <Route path="doctor-schedule" element={<DoctorSchedule />} />
+          <Route path="settings" element={<HospitalSettings />} />
         </Route>
 
         {/* PATIENT */}
@@ -75,6 +80,7 @@ function AppRouter() {
           <Route path="profile" element={<PatientProfile />} />
           <Route path="book-appointment" element={<BookAppointment />} />
           <Route path="appointments" element={<PatientAppointments />} />
+          <Route path="settings" element={<PatientSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>

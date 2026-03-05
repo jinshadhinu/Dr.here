@@ -44,6 +44,29 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    // Online payment provider metadata (optional)
+    provider: {
+      type: String,
+      enum: ["razorpay", "other"],
+      default: "other",
+    },
+    currency: {
+      type: String,
+      default: "INR",
+    },
+    razorpayOrderId: {
+      type: String,
+      default: "",
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: "",
+    },
+    razorpaySignature: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

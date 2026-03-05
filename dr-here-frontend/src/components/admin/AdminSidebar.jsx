@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./AdminSidebar.css";
-import { FaHome, FaBuilding, FaPlus } from "react-icons/fa";
+import { FaHome, FaBuilding, FaPlus, FaCog } from "react-icons/fa";
 
 function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +42,11 @@ function AdminSidebar() {
         <li className={isActive("/admin/add-hospital") ? "active" : ""}>
           <Link to="/admin/add-hospital">
             <FaPlus /> {isOpen && "Add Hospital"}
+          </Link>
+        </li>
+        <li className={isActive("/admin/settings") ? "active" : ""}>
+          <Link to="/admin/settings">
+            <FaCog /> {isOpen && "Settings"}
           </Link>
         </li>
       </ul>

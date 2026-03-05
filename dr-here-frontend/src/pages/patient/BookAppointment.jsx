@@ -2,6 +2,26 @@ import { useState, useEffect } from "react";
 import "./BookAppointment.css";
 import axios from "axios";
 
+const API_BASE_URL = "http://localhost:5000/api";
+
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true));
+      existing.addEventListener("error", () => resolve(false));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 function BookAppointment() {
   const [hospitals, setHospitals] = useState([]);
   const [selectedHospital, setSelectedHospital] = useState(null);
@@ -15,7 +35,8 @@ function BookAppointment() {
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
   const [advanceAmount, setAdvanceAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [onlinePaymentId, setOnlinePaymentId] = useState(null);
 
   useEffect(() => {
     fetchHospitals();
@@ -24,7 +45,7 @@ function BookAppointment() {
   const fetchHospitals = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/patient/hospitals");
+      const res = await axios.get(`${API_BASE_URL}/patient/hospitals`);
       if (res.data.success) {
         setHospitals(res.data.data || []);
       }
@@ -43,10 +64,11 @@ function BookAppointment() {
       setSelectedDepartment(null);
       setSelectedDoctor(null);
       setAvailableSlots([]);
+      setOnlinePaymentId(null);
       
       // Fetch departments for selected hospital
       const deptRes = await axios.get(
-        `http://localhost:5000/api/patient/hospitals/${hospitalId}/departments`
+        `${API_BASE_URL}/patient/hospitals/${hospitalId}/departments`
       );
       if (deptRes.data.success) {
         setDepartments(deptRes.data.data || []);
@@ -54,7 +76,7 @@ function BookAppointment() {
 
       // Fetch all doctors for hospital
       const docRes = await axios.get(
-        `http://localhost:5000/api/patient/hospitals/${hospitalId}/doctors`
+        `${API_BASE_URL}/patient/hospitals/${hospitalId}/doctors`
       );
       if (docRes.data.success) {
         setDoctors(docRes.data.data || []);
@@ -73,9 +95,10 @@ function BookAppointment() {
       setSelectedDepartment(departmentId);
       setSelectedDoctor(null);
       setAvailableSlots([]);
+      setOnlinePaymentId(null);
 
       const res = await axios.get(
-        `http://localhost:5000/api/patient/hospitals/${selectedHospital}/departments/${departmentId}/doctors`
+        `${API_BASE_URL}/patient/hospitals/${selectedHospital}/departments/${departmentId}/doctors`
       );
       if (res.data.success) {
         setDoctors(res.data.data || []);
@@ -95,10 +118,11 @@ function BookAppointment() {
       setSelectedDate(null);
       setSelectedTimeSlot(null);
       setAdvanceAmount("");
+      setOnlinePaymentId(null);
 
       // Fetch available slots for doctor
       const res = await axios.get(
-        `http://localhost:5000/api/doctors/${doctorId}/slots`
+        `${API_BASE_URL}/doctors/${doctorId}/slots`
       );
       if (res.data.success) {
         setAvailableSlots(res.data.data || []);
@@ -108,6 +132,162 @@ function BookAppointment() {
       alert("Failed to load available slots");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSelectedHospital(null);
+    setSelectedDepartment(null);
+    setSelectedDoctor(null);
+    setSelectedDate(null);
+    setSelectedTimeSlot(null);
+    setAdvanceAmount("");
+    setAvailableSlots([]);
+    setDepartments([]);
+    setDoctors([]);
+    setPaymentMethod("online");
+    setOnlinePaymentId(null);
+  };
+
+  const openRazorpayCheckout = async ({ keyId, order, paymentId }) => {
+    const scriptOk = await loadRazorpayScript();
+    if (!scriptOk) {
+      alert("Failed to load Razorpay checkout. Please check your internet connection.");
+      return;
+    }
+
+    const options = {
+      key: keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Dr.Here",
+      description: "Advance payment for appointment booking",
+      order_id: order.id,
+      handler: async (response) => {
+        try {
+          const token = localStorage.getItem("token");
+          const verifyRes = await axios.post(
+            `${API_BASE_URL}/patient/razorpay/verify`,
+            {
+              paymentId,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (verifyRes.data.success) {
+            alert("Payment successful! Appointment booked and confirmed.");
+            resetForm();
+            fetchHospitals();
+          } else {
+            alert("Payment verification failed. Please contact support.");
+          }
+        } catch (err) {
+          console.error("Verify payment error:", err);
+          alert(err.response?.data?.message || "Payment verification failed.");
+        } finally {
+          setOnlinePaymentId(null);
+        }
+      },
+      modal: {
+        ondismiss: async () => {
+          try {
+            const token = localStorage.getItem("token");
+            await axios.post(
+              `${API_BASE_URL}/patient/razorpay/cancel`,
+              { paymentId },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+          } catch (err) {
+            console.error("Cancel payment error:", err);
+          } finally {
+            setOnlinePaymentId(null);
+            alert("Payment cancelled. Slot has been released.");
+          }
+        },
+      },
+      theme: {
+        color: "#0ea5e9",
+      },
+    };
+
+    const rz = new window.Razorpay(options);
+    rz.on("payment.failed", async () => {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          `${API_BASE_URL}/patient/razorpay/cancel`,
+          { paymentId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } catch (err) {
+        console.error("Payment failed cancel error:", err);
+      } finally {
+        setOnlinePaymentId(null);
+        alert("Payment failed. Please try again.");
+      }
+    });
+
+    rz.open();
+  };
+
+  const handleOnlineBooking = async () => {
+    if (!selectedDoctor || !selectedTimeSlot) {
+      alert("Please select a doctor, date, and time slot");
+      return;
+    }
+
+    const numericAdvance = Number(advanceAmount);
+    if (!advanceAmount || Number.isNaN(numericAdvance) || numericAdvance < 100) {
+      alert("Advance payment of at least 100 is required.");
+      return;
+    }
+
+    try {
+      setBooking(true);
+      const token = localStorage.getItem("token");
+
+      const createRes = await axios.post(
+        `${API_BASE_URL}/patient/razorpay/create-order`,
+        {
+          doctorId: selectedDoctor,
+          slotDate: selectedTimeSlot.date,
+          advanceAmount: numericAdvance,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!createRes.data.success) {
+        alert(createRes.data.message || "Failed to start online payment");
+        return;
+      }
+
+      const { keyId, order, paymentId } = createRes.data.data;
+      setOnlinePaymentId(paymentId);
+      await openRazorpayCheckout({ keyId, order, paymentId });
+    } catch (err) {
+      console.error("Online booking error:", err);
+      alert(err.response?.data?.message || "Failed to start Razorpay payment");
+    } finally {
+      setBooking(false);
     }
   };
 
@@ -125,9 +305,14 @@ function BookAppointment() {
 
     try {
       setBooking(true);
+      if (paymentMethod === "online") {
+        await handleOnlineBooking();
+        return;
+      }
+
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/patient/book-appointment",
+        `${API_BASE_URL}/patient/book-appointment`,
         {
           doctorId: selectedDoctor,
           slotDate: selectedTimeSlot.date,
@@ -143,16 +328,7 @@ function BookAppointment() {
 
       if (res.data.success) {
         alert("Appointment booked successfully with advance payment!");
-        // Reset form
-        setSelectedHospital(null);
-        setSelectedDepartment(null);
-        setSelectedDoctor(null);
-        setSelectedDate(null);
-        setSelectedTimeSlot(null);
-        setAdvanceAmount("");
-        setAvailableSlots([]);
-        setDepartments([]);
-        setDoctors([]);
+        resetForm();
         fetchHospitals();
       }
     } catch (err) {
@@ -315,9 +491,9 @@ function BookAppointment() {
           <div className="payment-section">
             <h3>Advance Payment (Required)</h3>
             <p className="payment-note">
-              An advance payment of at least 100 is required to confirm your appointment.
-              If you choose Cash, you will pay this amount at the hospital reception (no online transfer happens in the app).
+              Pay an advance (min 100) to confirm your slot. Online payments are processed securely via Razorpay.
             </p>
+
             <div className="payment-fields">
               <div className="field">
                 <label htmlFor="advanceAmount">Advance Amount (min 100)</label>
@@ -328,29 +504,58 @@ function BookAppointment() {
                   value={advanceAmount}
                   onChange={(e) => setAdvanceAmount(e.target.value)}
                   placeholder="Enter amount"
+                  disabled={booking}
                 />
               </div>
-              <div className="field">
-                <label htmlFor="paymentMethod">Payment Method</label>
-                <select
-                  id="paymentMethod"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                >
-                  <option value="cash">Cash</option>
-                  <option value="card">Card</option>
-                  <option value="online">Online</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
             </div>
+
+            <div className="payment-methods" role="group" aria-label="Payment method">
+              <button
+                type="button"
+                className={`payment-method-card razorpay ${paymentMethod === "online" ? "active" : ""}`}
+                onClick={() => setPaymentMethod("online")}
+                disabled={booking}
+              >
+                <div className="title">Online (Razorpay)</div>
+                <div className="subtitle">Instant confirmation</div>
+              </button>
+              <button
+                type="button"
+                className={`payment-method-card ${paymentMethod === "cash" ? "active" : ""}`}
+                onClick={() => setPaymentMethod("cash")}
+                disabled={booking}
+              >
+                <div className="title">Cash at Hospital</div>
+                <div className="subtitle">Marked as pending</div>
+              </button>
+            </div>
+
+            {paymentMethod === "online" ? (
+              <div className="razorpay-panel">
+                <div className="rz-row">
+                  <div className="rz-badge">Razorpay</div>
+                  <div className="rz-text">
+                    <div className="rz-strong">Secure online payment</div>
+                    <div className="rz-muted">Your appointment is confirmed after successful payment.</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="cash-panel">
+                Cash advance will be collected at the hospital reception. Your payment status will remain pending until collected.
+              </div>
+            )}
           </div>
           <button
             className="book-btn"
             onClick={handleBookAppointment}
-            disabled={booking}
+            disabled={booking || (paymentMethod === "online" && !!onlinePaymentId)}
           >
-            {booking ? "Booking..." : "Book Appointment"}
+            {booking
+              ? "Processing..."
+              : paymentMethod === "online"
+                ? "Pay & Book Appointment"
+                : "Book Appointment"}
           </button>
         </div>
       )}
